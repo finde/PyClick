@@ -16,7 +16,8 @@ class TCM(ClickModel):
     def init_params(self, init_param_values):
         self.param_helper = TCMParamHelper()
         params = {
-                #PARAMETERS
+                #NOTE(Luka): Need to init params
+                # Also which params do we need? 
                 }
 
         return params
@@ -24,7 +25,7 @@ class TCM(ClickModel):
     def get_p_click(self, param_values):
         pass
 
-    def predict_click_probs(self, session):
+    def predict_click_probs(self, session): #NOTE(Luka): Might become task instead of session
         pass
 
     def from_JSON(self, json_str):
@@ -34,9 +35,7 @@ class TCM(ClickModel):
 
     @staticmethod
     def get_prior_values():
-        return {UBMRelevance.NAME: 0.5,
-                UBMExamination.NAME: 0.5}
-
+        pass
 
 class TCMParamHelper(object):
     pass
