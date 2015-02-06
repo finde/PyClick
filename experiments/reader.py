@@ -7,7 +7,8 @@ def transform_to_tasks(sessions):
     #time_interval = 430  NOTE(Luka): Taken from Piwowarski 2009, Mining User Web Search Activity... according to TCM Paper
                         # Should be in seconds however Yandex click log does not add this information..
                         # This means all queries with same session_id will be a task.
-                        # Also have no way to measure similarity between queries..
+                        # Also have no way to measure similarity between queries.
+                        # However we can assume that Yandex has made session_ids already into tasks according to website
     return sessions.items()
 
 
