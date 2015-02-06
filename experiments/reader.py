@@ -1,15 +1,14 @@
 import sys
-from click_models.BBM import BBM
 from session.Session import Session, Result
 import numpy as np
+from collections import defaultdict
 
-def train_test_split(sessions, split_fraction):
-    sessions = np.array(sessions)
-    mask = np.random.rand(*sessions.shape)
-    train = mask < split_fraction
-    train_sessions = sessions[train]
-    test_sessions = sessions[np.logical_not(train)]
-    return train_sessions, test_sessions
+def transform_to_tasks(sessions):
+    #time_interval = 430  NOTE(Luka): Taken from Piwowarski 2009, Mining User Web Search Activity... according to TCM Paper
+                        # Should be in seconds however Yandex click log does not add this information..
+                        # This means all queries with same session_id will be a task.
+    return sessions.items()
+
 
 def parse_yandex_sessions(sessions_filename, max_sessions = None, split_fraction = 0.75):
     """
@@ -27,8 +26,8 @@ def parse_yandex_sessions(sessions_filename, max_sessions = None, split_fraction
 
     """
     sessions_file = open(sessions_filename,"r")
-    sessions = []
-    all_clicks = []
+    session_dict = defaultdict(list)
+    count = 0
     for line_n,line in enumerate(sessions_file):
 
         #NOTE(Luka): Limit the amount of lines to ease the development work because the whole file has 14.5 Million Sessions-lines and 19.5 Million Clicks-lines.
@@ -46,19 +45,19 @@ def parse_yandex_sessions(sessions_filename, max_sessions = None, split_fraction
                 web_result = Result(doc, -1, 0)
                 session.add_web_result(web_result)
             
-            if sessions and not [click for click in sessions[-1].get_clicks() if click]:
-                sessions.pop()
-            if len(sessions) >= max_sessions:
+            if count >= max_sessions:
                 break
-            sessions.append(session)
+            
+            session_dict[session_id].append(session)
+            count += 1
 
         if type_action is "C":
             doc = session_str[3]
             #NOTE(Luka): Only look at last session, don't look at session_id
-            for result in sessions[-1].web_results:
+            for result in session_dict[session_id][-1].web_results:
                 if result.object == doc:
                     result.click = 1
-                    all_clicks.append((sessions[-1],result))
+
                     #print "Click found!"
                     break
             else:
@@ -66,8 +65,7 @@ def parse_yandex_sessions(sessions_filename, max_sessions = None, split_fraction
                 #print "Could not find {} for session {}".format(doc,session_id)
                 pass
     
-    train_set, test_set = train_test_split(sessions,split_fraction)
-    return train_set, test_set
+    return session_dict
 
 if __name__ == "__main__":
     if not len(sys.argv) == 2:
@@ -76,7 +74,7 @@ if __name__ == "__main__":
 
     max_sessions = 1000
     fn = sys.argv[1]
-    train_set, test_set = parse_yandex_sessions(fn,max_sessions)
-    print "Train set:",train_set.size,"sessions loaded."
-    print "Test set:",test_set.size,"sessions loaded."
-
+    sessions_dict = parse_yandex_sessions(fn,max_sessions)
+    tasks = transform_to_tasks(sessions_dict)
+    print sessions_dict['67']
+    print '#Tasks:\t',len(tasks)
