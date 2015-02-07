@@ -10,6 +10,8 @@ from click_models.DCM import DCM
 from click_models.SimpleDBN import SimpleDBN
 from click_models.SimpleDCM import SimpleDCM
 from click_models.UBM import UBM
+from click_models.TCM import TCM
+from reader import parse_yandex_sessions, transform_to_tasks
 from session.Session import *
 
 __author__ = 'Ilya Markov'
@@ -44,15 +46,19 @@ def parse_wsdm_sessions(sessions_filename):
     return sessions
 
 
-def main(train_filename, test_filename):
-    train_sessions = parse_wsdm_sessions(train_filename)
-    test_sessions = parse_wsdm_sessions(test_filename)
+def main(train_filename):
+    sessions_dict = parse_yandex_sessions(train_filename,100)
 
     #TODO: fix initialization
-    for click_model_class in [SimpleDCM, SimpleDBN, DBN, UBM]:
+    for click_model_class in [UBM, TCM, SimpleDCM, SimpleDBN, DBN, UBM]:
+        if click_model_class.__name__ == TCM.__name__:
+            sessions = transform_to_tasks(sessions_dict)
+        else:
+            sessions = [s for t in sessions_dict.values() for s in t]
+
         print "==== %s ====" % click_model_class.__name__
         click_model = click_model_class(click_model_class.get_prior_values())
-        click_model.train(train_sessions)
+        click_model.train(sessions)
 
         print click_model
 
@@ -63,8 +69,8 @@ def main(train_filename, test_filename):
 
 # An example of using PyClick.
 if __name__ == '__main__':
-    if len(sys.argv) < 3:
+    if len(sys.argv) < 2:
         print "USAGE: %s <file with train sessions> <file with test sessions>" % sys.argv[0]
         sys.exit(1)
 
-    main(sys.argv[1], sys.argv[2])
+    main(sys.argv[1])

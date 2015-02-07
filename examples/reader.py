@@ -9,7 +9,7 @@ def transform_to_tasks(sessions):
                         # This means all queries with same session_id will be a task.
                         # Also have no way to measure similarity between queries.
                         # However we can assume that Yandex has made session_ids already into tasks according to website
-    return sessions.items()
+    return sessions.values()
 
 
 def parse_yandex_sessions(sessions_filename, max_sessions = None, split_fraction = 0.75):

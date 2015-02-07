@@ -70,7 +70,7 @@ class ClickModel(object):
         """
             Returns the model's parameters for a given rank in a given session.
 
-            Can be verriden by subclasses.
+            Can be overriden by subclasses.
         """
         params = {}
         for param_name in base_params:

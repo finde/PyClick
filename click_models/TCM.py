@@ -7,20 +7,39 @@ from click_models.ClickModel import ClickModelParam, ClickModelParamWrapper, Cli
     RelevanceWrapperRel
 from click_models.Constants import MAX_DOCS_PER_QUERY
 
+MAX_ITERATIONS = 40
+
 
 __author__ = 'Ilya Markov'
-
 
 class TCM(ClickModel):
 
     def init_params(self, init_param_values):
         self.param_helper = TCMParamHelper()
         params = {
-                #NOTE(Luka): Need to init params
-                # Also which params do we need? 
+                TCMExamination.NAME: TCMExaminationWrapper(init_param_values, TCMExamination.default(), param_helper = self.param_helper),
+                TCMRelevance.NAME: TCMRelevanceWrapper(init_param_values, TCMRelevance.default(),param_helper = self.param_helper),
+                TCMIntent.NAME: TCMIntentWrapper(init_param_values, TCMIntent.default(),param_helper = self.param_helper),
+                TCMAnother.NAME: TCMAnotherWrapper(init_param_values, TCMAnother.default(),param_helper = self.param_helper),
+                TCMFreshness.NAME: TCMFreshnessWrapper(init_param_values, TCMFreshness.default(),param_helper = self.param_helper)
                 }
-
         return params
+
+    def train(self, tasks):
+        
+        if len(tasks) <= 0:
+            print >>sys.stderr, "The number of training sessions is zero."
+            return
+
+        
+        for i in xrange(MAX_ITERATIONS):
+            for task in tasks:
+                #UPDATE PARAMS
+                self.params = self.get_updated_params(task, self.params)
+
+
+    def get_updated_params(self, sessions, priors):
+        return self.params
 
     def get_p_click(self, param_values):
         pass
@@ -35,46 +54,156 @@ class TCM(ClickModel):
 
     @staticmethod
     def get_prior_values():
-        pass
+        return {
+                TCMRelevance.NAME: 0.5,
+                TCMExamination.NAME: 0.5,
+                TCMIntent.NAME: 0.5,
+                TCMAnother.NAME: 0.5,
+                TCMFreshness.NAME: 0.5,
+                }
+
+
 
 class TCMParamHelper(object):
     pass
 
-class TCMParam(ClickModelParam):
+class TCMRelevance(ClickModelParam):
     """
-        Parameter of a general click model
-    """
-    def __init__(self, init_value, **kwargs):
-        super(TCMParam, self).__init__(init_value)
-        if 'param_helper' in kwargs:
-            self.param_helper = kwargs['param_helper']
-        else:
-            self.param_helper = TCMParamHelper()
-
-
-class TCMRelevance(UBMParam):
-    """
-        Probability of relevance/attractiveness: rel = P(A = 1 | E = 1).
+        Probability of relevance: rel = P(R_ij = 1) = r_d.
     """
     NAME = "rel"
 
-    def update_value(self, param_values, click):
+    def update_value(self, param_values):
         pass
 
 class TCMExamination(ClickModelParam):
     """
-        Examination probability: exam = P(E = 1).
+        Examination probability: exam = P(E_ij = 1). beta_j
     """
     NAME = "exam"
 
-    def update_value(self, param_values, click):
+    def update_value(self, param_values):
         pass
 
+class TCMIntent(ClickModelParam):
+    """
+        Matches user intent probability: intent = P(M_i = 1). alpha1
+    """
+    NAME = "intent"
+
+    def update_values(self, param_values):
+        pass
+
+class TCMAnother(ClickModelParam):
+    """
+        Whether user submits other query after i: another = P(N_i = 1 | M_i = 1). alpha2
+    """
+    NAME = "another"
+
+    def update_values(self, param_values):
+        pass
+
+class TCMFreshness(ClickModelParam):
+    """
+        Freshness of document: fresh = P(F_ij | H_ij). alpha3
+        H_ij = Previous examination of doc at rank j in session (Binary)
+    """
+    NAME = "fresh"
+
+    def update_values(self, param_values):
+        pass
+
+
 class TCMExaminationWrapper(ClickModelParamWrapper):
-    pass
 
-class TCMRelevanceWrapper(RelevanceWrapper):
-    pass
+    def init_param_rule(self, init_param_func, **kwargs):
+        """
+            Defines the way of initializing parameters.
+        """
+        return init_param_func(**kwargs)
 
-class UBMRelevanceWrapperRel(RelevanceWrapperRel):
-    pass
+    def get_param(self, session, rank, **kwargs):
+        """
+            Returns the value of the parameter for a given session and rank.
+        """
+        pass
+
+    def get_params_from_JSON(self, json_str):
+        pass
+
+
+class TCMRelevanceWrapper(ClickModelParamWrapper):
+
+    def init_param_rule(self, init_param_func, **kwargs):
+        """
+            Defines the way of initializing parameters.
+        """
+        return init_param_func(**kwargs)
+
+    def get_param(self, session, rank, **kwargs):
+        """
+            Returns the value of the parameter for a given session and rank.
+        """
+        pass
+
+    def get_params_from_JSON(self, json_str):
+        pass
+
+class TCMIntentWrapper(ClickModelParamWrapper):
+
+    def init_param_rule(self, init_param_func, **kwargs):
+        """
+            Defines the way of initializing parameters.
+        """
+        return init_param_func(**kwargs)
+
+
+    def get_param(self, session, rank, **kwargs):
+        """
+            Returns the value of the parameter for a given session and rank.
+        """
+        pass
+
+    def get_params_from_JSON(self, json_str):
+        pass
+
+
+class TCMAnotherWrapper(ClickModelParamWrapper):
+
+    def init_param_rule(self, init_param_func, **kwargs):
+        """
+            Defines the way of initializing parameters.
+        """
+        return init_param_func(**kwargs)
+
+
+    def get_param(self, session, rank, **kwargs):
+        """
+            Returns the value of the parameter for a given session and rank.
+        """
+        pass
+
+    def get_params_from_JSON(self, json_str):
+        pass
+
+
+class TCMFreshnessWrapper(ClickModelParamWrapper):
+
+    def init_param_rule(self, init_param_func, **kwargs):
+        """
+            Defines the way of initializing parameters.
+        """
+        return init_param_func(**kwargs)
+
+
+    def get_param(self, session, rank, **kwargs):
+        """
+            Returns the value of the parameter for a given session and rank.
+        """
+        pass
+
+    def get_params_from_JSON(self, json_str):
+        pass
+
+
+

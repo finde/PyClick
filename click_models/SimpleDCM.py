@@ -119,7 +119,6 @@ class SimpleDCMRelevance(ClickModelParam):
     def update_value(self, param_values, click, **kwargs):
         last_click_rank = kwargs['last_click_rank']
         rank = kwargs['rank']
-
         if rank <= last_click_rank:
             if click == 1:
                 self.numerator += 1
