@@ -32,13 +32,20 @@ class TCM(ClickModel):
             return
 
         
-        for i in xrange(MAX_ITERATIONS):
-            for task in tasks:
-                #UPDATE PARAMS
-                self.params = self.get_updated_params(task, self.params)
+        diff = float('inf')
+        treshold = 0.0001
+        while diff > treshold:
+
+            #E-Step
+            #In the E-Step, we compute the marginal posterior distribution of each hidden variable to associate parameters that we introduced. The computation is performed based on the parameter values updated in the previous iteration, which are further discussed in Section 5.1. 
+
+            #M-Step
+            #In the M-Step, all posterior probabilities associated with the same param- eter are averaged to update the parameters. 
+            self.params = self.get_updated_params(tasks, self.params)
 
 
-    def get_updated_params(self, sessions, priors):
+
+    def get_updated_params(self, tasks, priors):
         return self.params
 
     def get_p_click(self, param_values):
