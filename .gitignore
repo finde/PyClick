@@ -55,3 +55,6 @@ target/
 
 # data folder
 data/
+
+# vim
+.swp
