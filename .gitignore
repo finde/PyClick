@@ -57,4 +57,4 @@ target/
 data/
 
 # vim
-.swp
+*.swp
