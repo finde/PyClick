@@ -50,7 +50,7 @@ def main(train_filename):
     sessions_dict = parse_yandex_sessions(train_filename,100)
 
     #TODO: fix initialization
-    for click_model_class in [UBM, TCM, SimpleDCM, SimpleDBN, DBN, UBM]:
+    for click_model_class in [TCM, SimpleDCM, SimpleDBN, DBN, UBM]:
         if click_model_class.__name__ == TCM.__name__:
             sessions = transform_to_tasks(sessions_dict)
         else:

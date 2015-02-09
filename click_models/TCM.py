@@ -7,6 +7,10 @@ from click_models.ClickModel import ClickModelParam, ClickModelParamWrapper, Cli
     RelevanceWrapperRel
 from click_models.Constants import MAX_DOCS_PER_QUERY
 
+
+from functools import partial
+from collections import defaultdict
+
 MAX_ITERATIONS = 40
 
 
@@ -42,7 +46,7 @@ class TCM(ClickModel):
             #M-Step
             #In the M-Step, all posterior probabilities associated with the same param- eter are averaged to update the parameters. 
             self.params = self.get_updated_params(tasks, self.params)
-
+            break
 
 
     def get_updated_params(self, tasks, priors):
@@ -78,6 +82,9 @@ class TCMRelevance(ClickModelParam):
     """
         Probability of relevance: rel = P(R_ij = 1) = r_d.
     """
+
+    #NOTE(Luka): Does not depend on any hidden variables (according to fig. 4)
+
     NAME = "rel"
 
     def update_value(self, param_values):
@@ -87,6 +94,9 @@ class TCMExamination(ClickModelParam):
     """
         Examination probability: exam = P(E_ij = 1). beta_j
     """
+    
+    #NOTE(Luka): Does not depend on any hidden variables (according to fig. 4)
+
     NAME = "exam"
 
     def update_value(self, param_values):
@@ -96,6 +106,9 @@ class TCMIntent(ClickModelParam):
     """
         Matches user intent probability: intent = P(M_i = 1). alpha1
     """
+
+    #NOTE(Luka): Does not depend on any hidden variables (according to fig. 4)
+    
     NAME = "intent"
 
     def update_values(self, param_values):
@@ -105,6 +118,9 @@ class TCMAnother(ClickModelParam):
     """
         Whether user submits other query after i: another = P(N_i = 1 | M_i = 1). alpha2
     """
+
+    #NOTE(Luka): Only depends on Intent (M_i)
+    
     NAME = "another"
 
     def update_values(self, param_values):
@@ -114,7 +130,11 @@ class TCMFreshness(ClickModelParam):
     """
         Freshness of document: fresh = P(F_ij | H_ij). alpha3
         H_ij = Previous examination of doc at rank j in session (Binary)
+
     """
+
+    #NOTE(Luka): Depends on Previous examination (H_ij)
+    
     NAME = "fresh"
 
     def update_values(self, param_values):
@@ -123,17 +143,21 @@ class TCMFreshness(ClickModelParam):
 
 class TCMExaminationWrapper(ClickModelParamWrapper):
 
+    # Shape: (max_rank,1)
+    # Max rank in Yandex is 10
+
+
     def init_param_rule(self, init_param_func, **kwargs):
         """
             Defines the way of initializing parameters.
         """
-        return init_param_func(**kwargs)
+        return [init_param_func(**kwargs) for _  in xrange(MAX_DOCS_PER_QUERY)]
 
-    def get_param(self, session, rank, **kwargs):
+    def get_param(self, rank, **kwargs):
         """
             Returns the value of the parameter for a given session and rank.
         """
-        pass
+        return self.params[rank]
 
     def get_params_from_JSON(self, json_str):
         pass
@@ -141,35 +165,43 @@ class TCMExaminationWrapper(ClickModelParamWrapper):
 
 class TCMRelevanceWrapper(ClickModelParamWrapper):
 
+    # Shape: (N_queries,N_docs) 
+    # N_docs that are on all result pages for query, so prob defaultdict of a defaultdict
+    # with an initialized value?
+
     def init_param_rule(self, init_param_func, **kwargs):
         """
             Defines the way of initializing parameters.
         """
-        return init_param_func(**kwargs)
+        init = partial(init_param_func,**kwargs)
+        params = defaultdict(lambda : defaultdict(init))
+        return params
 
-    def get_param(self, session, rank, **kwargs):
+    def get_param(self, query_id, doc_id, **kwargs):
         """
             Returns the value of the parameter for a given session and rank.
         """
-        pass
+        return self.params[query_id][doc_id]
 
     def get_params_from_JSON(self, json_str):
         pass
 
 class TCMIntentWrapper(ClickModelParamWrapper):
 
+    # Shape: (N_query,1)
+
     def init_param_rule(self, init_param_func, **kwargs):
         """
             Defines the way of initializing parameters.
         """
-        return init_param_func(**kwargs)
+        return defaultdict(lambda : init_param_func(**kwargs))
 
 
-    def get_param(self, session, rank, **kwargs):
+    def get_param(self, query_id, **kwargs):
         """
             Returns the value of the parameter for a given session and rank.
         """
-        pass
+        return self.params[query_id]
 
     def get_params_from_JSON(self, json_str):
         pass
@@ -177,18 +209,20 @@ class TCMIntentWrapper(ClickModelParamWrapper):
 
 class TCMAnotherWrapper(ClickModelParamWrapper):
 
+    # Shape: (N_query, 1)
+
     def init_param_rule(self, init_param_func, **kwargs):
         """
             Defines the way of initializing parameters.
         """
-        return init_param_func(**kwargs)
+        return defaultdict(lambda : init_param_func(**kwargs))
 
 
-    def get_param(self, session, rank, **kwargs):
+    def get_param(self, query_id, **kwargs):
         """
             Returns the value of the parameter for a given session and rank.
         """
-        pass
+        return self.params[query_id]
 
     def get_params_from_JSON(self, json_str):
         pass
@@ -196,18 +230,22 @@ class TCMAnotherWrapper(ClickModelParamWrapper):
 
 class TCMFreshnessWrapper(ClickModelParamWrapper):
 
+    # Shape: (N_queries,N_docs)
+    # See TCMRelevance for explanation
+
     def init_param_rule(self, init_param_func, **kwargs):
         """
             Defines the way of initializing parameters.
         """
-        return init_param_func(**kwargs)
+        init = partial(init_param_func,**kwargs)
+        params = defaultdict(lambda : defaultdict(init))
+        return params
 
-
-    def get_param(self, session, rank, **kwargs):
+    def get_param(self, query_id, doc_id, **kwargs):
         """
             Returns the value of the parameter for a given session and rank.
         """
-        pass
+        return self.params[query_id][doc_id]
 
     def get_params_from_JSON(self, json_str):
         pass
