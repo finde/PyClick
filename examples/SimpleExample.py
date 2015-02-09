@@ -47,10 +47,21 @@ def parse_wsdm_sessions(sessions_filename):
 
 
 def main(train_filename):
-    sessions_dict = parse_yandex_sessions(train_filename,100)
 
-    #TODO: fix initialization
-    for click_model_class in [TCM, SimpleDCM, SimpleDBN, DBN, UBM]:
+    sessions_dict = parse_yandex_sessions(train_filename, 100)
+
+    classes = [
+        TCM,
+        # UBM,
+        # SimpleDCM,
+        # SimpleDBN,
+        # DBN,
+        # UBM
+    ]
+
+    # TODO: fix initialization
+    for click_model_class in classes:
+
         if click_model_class.__name__ == TCM.__name__:
             sessions = transform_to_tasks(sessions_dict)
         else:
@@ -63,14 +74,16 @@ def main(train_filename):
         print click_model
 
         print "Log-likelihood and perplexity"
-        print click_model.test(test_sessions)
+        # print click_model.test(test_sessions)
         print ""
 
 
 # An example of using PyClick.
 if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        print "USAGE: %s <file with train sessions> <file with test sessions>" % sys.argv[0]
-        sys.exit(1)
+    main('data/YandexClicks-sample.txt')
 
-    main(sys.argv[1])
+    # if len(sys.argv) < 2:
+    # print "USAGE: %s <file with train sessions> <file with test sessions>" % sys.argv[0]
+    #     sys.exit(1)
+    #
+    # main(sys.argv[1])
