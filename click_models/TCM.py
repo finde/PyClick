@@ -45,14 +45,17 @@ class TCM(ClickModel):
 
         self.params = self.init_params(self.get_prior_values())
 
+        self.param_helper.calculate_intent(self.params, tasks)
+        
         for iteration_count in xrange(MAX_ITERATIONS):
             self.params = self.get_updated_params(tasks, self.params)
 
             if not PRETTY_LOG:
                 print >>sys.stderr, 'Iteration: %d, LL: %.10f' % (iteration_count + 1, self.get_loglikelihood(sessions))
 
-        print self.test(tasks)
-    
+        print self.params[TCMIntent.NAME]
+
+
     def get_updated_params(self, tasks, priors):
         updated_params = priors
 
@@ -61,7 +64,6 @@ class TCM(ClickModel):
                 for rank, result in enumerate(session.web_results):
                     params = self.get_params(self.params, session, rank)
                     param_values = self.get_param_values(params)
-
                     current_params = self.get_params(updated_params, session, rank)
                     self.update_param_values(current_params, param_values, session, rank)
         return updated_params
@@ -194,9 +196,15 @@ class TCM(ClickModel):
 
 
 class TCMParamHelper(object):
-    pass
-
-
+    
+    def calculate_intent(self,params,tasks):
+        for task in tasks:
+            for session in task:
+                intent = params[TCMIntent.NAME].get_param(session,0)
+                if any(session.get_clicks()):
+                    intent.numerator += 1
+                intent.denominator += 1
+    
 class TCMRelevance(ClickModelParam):
     """
         Probability of relevance: rel = P(R_ij = 1) = r_d.
@@ -313,7 +321,7 @@ class TCMRelevanceWrapper(ClickModelParamWrapper):
         """
             Returns the value of the parameter for a given query and doc.
         """
-        return self.params[session][rank]
+        return self.params[session.query][rank]
 
     def get_params_from_JSON(self, json_str):
         pass
@@ -333,7 +341,7 @@ class TCMIntentWrapper(ClickModelParamWrapper):
         """
             Returns the value of the parameter for a given query.
         """
-        return self.params[session]
+        return self.params[session.query]
     
     def get_params_from_JSON(self, json_str):
         pass
@@ -354,7 +362,7 @@ class TCMAnotherWrapper(ClickModelParamWrapper):
         """
             Returns the value of the parameter for a given query.
         """
-        return self.params[session]
+        return self.params[session.query]
     
     def get_params_from_JSON(self, json_str):
         pass
@@ -376,7 +384,7 @@ class TCMFreshnessWrapper(ClickModelParamWrapper):
         """
             Returns the value of the parameter for a given query and document.
         """
-        return self.params[session][rank]
+        return self.params[session.query][rank]
 
     def get_params_from_JSON(self, json_str):
         pass
