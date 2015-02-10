@@ -51,7 +51,7 @@ class TCM(ClickModel):
             self.params = self.get_updated_params(tasks, self.params)
 
             if not PRETTY_LOG:
-                print >>sys.stderr, 'Iteration: %d, LL: %.10f' % (iteration_count + 1, self.get_loglikelihood(sessions))
+                print >>sys.stderr, 'Iteration: %d, LL: %.10f' % (iteration_count + 1, self.get_loglikelihood(tasks))
 
         print self.params[TCMIntent.NAME]
 
@@ -60,6 +60,8 @@ class TCM(ClickModel):
         updated_params = priors
 
         for task in tasks:
+            self.get_freshness(task)
+
             for session in task:
                 for rank, result in enumerate(session.web_results):
                     params = self.get_params(self.params, session, rank)
@@ -69,7 +71,6 @@ class TCM(ClickModel):
         return updated_params
 
     def get_freshness(self, task):
-    
         beta = self.params[TCMExamination.NAME]
         docs = {}
         position = {}
@@ -78,20 +79,23 @@ class TCM(ClickModel):
             for rank, result in enumerate(query.web_results):
                 if not position.has_key(result.object):
                     position[result.object] = [None] * len(task)
-                    docs[result.object] = [0] * len(task)
+                    docs[result.object] = [None] * len(task)
 
                 # store rank for proba calculation
                 position[result.object][query_index] = rank
 
+        # should return indicator I(H=0) and I(H=1)
+
         # calculate probability of if it already shown and examined
         # if it the first query, everything is fresh
         for d, queries in position.items():
-            last_prob = 0
+            is_new = 1
             for j, v in enumerate(queries):
                 if v is not None:
                     # will reach here if the document already shown before
-                    docs[d][j] = last_prob * beta.get_param(v)
-                last_prob = docs[d][j]
+                    docs[d][j] = is_new
+                    is_new = 0
+                # last_prob = docs[d][j]
         
         return docs
 

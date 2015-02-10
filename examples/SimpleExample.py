@@ -52,7 +52,7 @@ def main(train_filename):
 
     classes = [
         TCM,
-        UBM,
+        # UBM,
         # SimpleDCM,
         # SimpleDBN,
         # DBN,
@@ -74,7 +74,7 @@ def main(train_filename):
         print click_model
 
         print "Log-likelihood and perplexity"
-        print click_model.test(sessions)
+        # print click_model.test(sessions)
         print ""
 
 
