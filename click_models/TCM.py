@@ -14,6 +14,7 @@ from functools import partial
 from collections import defaultdict
 
 MAX_ITERATIONS = 40
+PRETTY_LOG = True
 
 __author__ = 'Ilya Markov'
 
@@ -34,69 +35,34 @@ class TCM(ClickModel):
         return params
 
     def train(self, tasks):
-
+        """
+            Trains the model.
+        """
         if len(tasks) <= 0:
-            print >> sys.stderr, "The number of training sessions is zero."
+            print >>sys.stderr, "The number of training sessions is zero."
             return
 
-        # init global parameters
-        alpha_1 = 0.5
-        alpha_2 = 0.5
-        alpha_3 = 0.5
+        self.params = self.init_params(self.get_prior_values())
 
-        # init temporal params
-        INIT_RELEVANCY = 0.5  # r_d
-
-        diff = float('inf')
-        treshold = 0.0001
-        last_p_click = 0
-
-        while diff > treshold:
-
-            # E-Step
-            # In the E-Step, we compute the marginal posterior distribution of each hidden variable to associate parameters that we introduced.
-            # The computation is performed based on the parameter values updated in the previous iteration, which are further discussed in Section 5.1.
-            # for each session/task
-            
-            beta = self.params[TCMExamination.NAME]
-            alpha_1 = self.params[TCMIntent.NAME]
-            alpha_2 = self.params[TCMAnother.NAME]
-            alpha_3 = self.params[TCMFreshness.NAME]
-            r_d = self.params[TCMRelevance.NAME]
-
-            p_click = 0
-            for session in tasks:
-
-                freshness = self.get_freshness(session)
-
-                # for each query
-                for q_index, query in enumerate(session):
-                    p_match_user_intention = alpha_1.get_param(query)
-                    
-                    # for each document
-                    # j = document rank for current query
-                    # d = document object
-                    for j, d in enumerate(query.web_results):
-
-                        p_examine_document = beta.get_param(j)
-                        
-                        p_relevance = r_d.get_param(query, d.object)
-                        
-                        p_fresh = alpha_3.get_param(query,d.object)
-                        p_fresh *= freshness[d.object][q_index]
-                        p_fresh += 1 - freshness[d.object][q_index]
-
-                        p_click += np.log10(p_match_user_intention * p_examine_document * p_relevance * p_fresh)
-
-            # M-Step
-            # In the M-Step, all posterior probabilities associated with the same parameter are averaged to update the parameters.
+        for iteration_count in xrange(MAX_ITERATIONS):
             self.params = self.get_updated_params(tasks, self.params)
-            
 
-            diff = abs(last_p_click - p_click)
-            last_p_click = p_click
-            print p_click
+            if not PRETTY_LOG:
+                print >>sys.stderr, 'Iteration: %d, LL: %.10f' % (iteration_count + 1, self.get_loglikelihood(sessions))
+    
+    def get_updated_params(self, tasks, priors):
+        updated_params = priors
 
+        for task in tasks:
+            for session in task:
+                for rank, result in enumerate(session.web_results):
+                    params = self.get_params(self.params, session, rank)
+                    param_values = self.get_param_values(params)
+
+                    current_params = self.get_params(updated_params, session, rank)
+                    self.update_param_values(current_params, param_values, session, rank)
+
+        return updated_params
 
     def get_freshness(self, task):
     
@@ -125,14 +91,43 @@ class TCM(ClickModel):
         
         return docs
 
-    def get_updated_params(self, tasks, priors):
-        return self.params
 
     def get_p_click(self, param_values):
         pass
 
     def predict_click_probs(self, session):  # NOTE(Luka): Might become task instead of session
-        pass
+        #TODO(Luka): This is wrong as we have no session but tasks in code. Need to change back
+        beta = self.params[TCMExamination.NAME]
+        alpha_1 = self.params[TCMIntent.NAME]
+        alpha_2 = self.params[TCMAnother.NAME]
+        alpha_3 = self.params[TCMFreshness.NAME]
+        r_d = self.params[TCMRelevance.NAME]
+
+        p_click = 0
+        for task in tasks:
+            freshness = self.get_freshness(task)
+            for session in tasks:
+                # for each query
+                for q_index, query in enumerate(session):
+                    p_match_user_intention = alpha_1.get_param(query).get_value()
+                    
+                    # for each document
+                    # j = document rank for current query
+                    # d = document object
+                    for j, d in enumerate(query.web_results):
+
+                        p_examine_document = beta.get_param(j).get_value()
+                        
+                        p_relevance = r_d.get_param(query, d.object).get_value()
+                        
+                        p_fresh = alpha_3.get_param(query,d.object).get_value()
+                        p_fresh *= freshness[d.object][q_index]
+                        p_fresh += 1 - freshness[d.object][q_index]
+
+                        p_click += np.log10(p_match_user_intention * p_examine_document * p_relevance * p_fresh)
+
+
+
 
     def from_JSON(self, json_str):
         param_helper_backup = self.param_helper
@@ -170,8 +165,8 @@ class TCMRelevance(ClickModelParam):
 
     NAME = "rel"
 
-    def update_value(self, param_values):
-        pass
+    def update_value(self, param_values, click):
+        pass        
 
 
 class TCMExamination(ClickModelParam):
@@ -183,7 +178,7 @@ class TCMExamination(ClickModelParam):
 
     NAME = "exam"
 
-    def update_value(self, param_values):
+    def update_value(self, param_values, click):
         pass
 
 
@@ -196,7 +191,7 @@ class TCMIntent(ClickModelParam):
     
     NAME = "intent"
 
-    def update_values(self, param_values):
+    def update_values(self, param_values, click):
         pass
 
 
@@ -209,7 +204,7 @@ class TCMAnother(ClickModelParam):
     
     NAME = "another"
 
-    def update_values(self, param_values):
+    def update_values(self, param_values, click):
         pass
 
 
@@ -224,7 +219,7 @@ class TCMFreshness(ClickModelParam):
     
     NAME = "fresh"
 
-    def update_values(self, param_values):
+    def update_values(self, param_values, click):
         pass
 
 
@@ -250,11 +245,11 @@ class TCMExaminationWrapper(ClickModelParamWrapper):
         return param
 
     
-    def get_param(self, rank, **kwargs):
+    def get_param(self, session, rank, **kwargs):
         """
             Returns the value of the parameter for a given rank.
         """
-        return self.params[rank-1].get_value()
+        return self.params[rank-1]
 
     def get_params_from_JSON(self, json_str):
         pass
@@ -273,11 +268,11 @@ class TCMRelevanceWrapper(ClickModelParamWrapper):
         params = defaultdict(lambda : defaultdict(init))
         return params
 
-    def get_param(self, query_id, doc_id, **kwargs):
+    def get_param(self, session, rank, **kwargs):
         """
             Returns the value of the parameter for a given query and doc.
         """
-        return self.params[query_id][doc_id].get_value()
+        return self.params[session][rank]
 
     def get_params_from_JSON(self, json_str):
         pass
@@ -293,12 +288,12 @@ class TCMIntentWrapper(ClickModelParamWrapper):
         return defaultdict(lambda : init_param_func(**kwargs))
 
 
-    def get_param(self, query_id, **kwargs):
+    def get_param(self, session, rank, **kwargs):
         """
             Returns the value of the parameter for a given query.
         """
-        return self.params[query_id].get_value()
-
+        return self.params[session]
+    
     def get_params_from_JSON(self, json_str):
         pass
 
@@ -314,12 +309,12 @@ class TCMAnotherWrapper(ClickModelParamWrapper):
         return defaultdict(lambda : init_param_func(**kwargs))
 
 
-    def get_param(self, query_id, **kwargs):
+    def get_param(self, session, rank, **kwargs):
         """
             Returns the value of the parameter for a given query.
         """
-        return self.params[query_id].get_value()
-
+        return self.params[session]
+    
     def get_params_from_JSON(self, json_str):
         pass
 
@@ -336,11 +331,11 @@ class TCMFreshnessWrapper(ClickModelParamWrapper):
         params = defaultdict(lambda : defaultdict(init))
         return params
 
-    def get_param(self, query_id, doc_id, **kwargs):
+    def get_param(self, session, rank, **kwargs):
         """
             Returns the value of the parameter for a given query and document.
         """
-        return self.params[query_id][doc_id].get_value()
+        return self.params[session][rank]
 
     def get_params_from_JSON(self, json_str):
         pass
