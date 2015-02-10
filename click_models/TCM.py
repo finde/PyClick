@@ -8,13 +8,14 @@ from click_models.ClickModel import ClickModelParam, ClickModelParamWrapper, Cli
 from click_models.Constants import MAX_DOCS_PER_QUERY
 import sys
 import numpy as np
+import math
 
 
 from functools import partial
 from collections import defaultdict
 
 MAX_ITERATIONS = 40
-PRETTY_LOG = 10
+PRETTY_LOG = True
 
 __author__ = 'Ilya Markov'
 
@@ -49,6 +50,8 @@ class TCM(ClickModel):
 
             if not PRETTY_LOG:
                 print >>sys.stderr, 'Iteration: %d, LL: %.10f' % (iteration_count + 1, self.get_loglikelihood(sessions))
+
+        print self.test(tasks)
     
     def get_updated_params(self, tasks, priors):
         updated_params = priors
@@ -61,7 +64,6 @@ class TCM(ClickModel):
 
                     current_params = self.get_params(updated_params, session, rank)
                     self.update_param_values(current_params, param_values, session, rank)
-
         return updated_params
 
     def get_freshness(self, task):
@@ -102,10 +104,40 @@ class TCM(ClickModel):
         p_click = alpha_1 * beta * r_d * alpha_3
         return p_click
 
+
+    def get_loglikelihood(self, tasks):
+        loglikelihood = 0
+        total_sessions = 0
+        for task in tasks:
+            for session in task:
+                log_click_probs = self.get_log_click_probs(session)
+                loglikelihood += sum(log_click_probs) / len(log_click_probs)
+            total_sessions += len(task)
+        loglikelihood /= total_sessions
+        return loglikelihood
+
+    def get_perplexity(self, tasks):
+        """
+        Returns the perplexity and position perplexities for given sessions.
+        """
+        perplexity_at_rank = [0.0] * MAX_DOCS_PER_QUERY
+        total_session = 0
+        for task in tasks:
+            for session in task:
+                log_click_probs = self.get_log_click_probs(session)
+                for rank, log_click_prob in enumerate(log_click_probs):
+                    perplexity_at_rank[rank] += math.log(math.exp(log_click_prob), 2)
+            total_session += len(task)
+        perplexity_at_rank = [2 ** (-x / total_session) for x in perplexity_at_rank]
+        perplexity = sum(perplexity_at_rank) / len(perplexity_at_rank)
+
+        return perplexity, perplexity_at_rank
+
     def predict_click_probs(self, session):  
         #NOTE(Luka): Don't think this is necessary for testing purposes
         #NOTE(Luka): Might become task instead of session
         #TODO(Luka): This is wrong as we have no session but tasks in code. Need to change back
+        ''.bla
         beta = self.params[TCMExamination.NAME]
         alpha_1 = self.params[TCMIntent.NAME]
         alpha_2 = self.params[TCMAnother.NAME]

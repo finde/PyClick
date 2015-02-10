@@ -103,7 +103,6 @@ class ClickModel(object):
             Returns the log-likelihood of the current model for the given sessions.
         """
         loglikelihood = 0
-
         for session in sessions:
             log_click_probs = self.get_log_click_probs(session)
             loglikelihood += sum(log_click_probs) / len(log_click_probs)
