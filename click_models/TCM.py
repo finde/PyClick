@@ -60,7 +60,7 @@ class TCM(ClickModel):
         updated_params = priors
 
         for task in tasks:
-            self.get_freshness(task)
+            self.current_task_freshness_indicators = self.get_freshness(task)
 
             for session in task:
                 for rank, result in enumerate(session.web_results):
