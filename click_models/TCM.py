@@ -14,7 +14,7 @@ from functools import partial
 from collections import defaultdict
 
 MAX_ITERATIONS = 40
-PRETTY_LOG = True
+PRETTY_LOG = 10
 
 __author__ = 'Ilya Markov'
 
@@ -93,9 +93,18 @@ class TCM(ClickModel):
 
 
     def get_p_click(self, param_values):
-        pass
+        beta = param_values[TCMExamination.NAME]
+        alpha_1 = param_values[TCMIntent.NAME]
+        alpha_2 = param_values[TCMAnother.NAME]
+        alpha_3 = param_values[TCMFreshness.NAME]
+        r_d = param_values[TCMRelevance.NAME]
 
-    def predict_click_probs(self, session):  # NOTE(Luka): Might become task instead of session
+        p_click = alpha_1 * beta * r_d * alpha_3
+        return p_click
+
+    def predict_click_probs(self, session):  
+        #NOTE(Luka): Don't think this is necessary for testing purposes
+        #NOTE(Luka): Might become task instead of session
         #TODO(Luka): This is wrong as we have no session but tasks in code. Need to change back
         beta = self.params[TCMExamination.NAME]
         alpha_1 = self.params[TCMIntent.NAME]
@@ -107,8 +116,8 @@ class TCM(ClickModel):
         for task in tasks:
             freshness = self.get_freshness(task)
             for session in tasks:
-                # for each query
-                for q_index, query in enumerate(session):
+                # for each result
+                for q, query in enumerate(session):
                     p_match_user_intention = alpha_1.get_param(query).get_value()
                     
                     # for each document
@@ -145,8 +154,8 @@ class TCM(ClickModel):
     def get_prior_values():
         return {
             TCMRelevance.NAME: 0.5,
-            TCMExamination.NAME: [0.9 ** i for i in xrange(MAX_DOCS_PER_QUERY)],
-            TCMIntent.NAME: 0.5,
+            TCMExamination.NAME: [1 for i in xrange(MAX_DOCS_PER_QUERY)],
+            TCMIntent.NAME: 1,
             TCMAnother.NAME: 0.5,
             TCMFreshness.NAME: 0.5,
         }
@@ -191,7 +200,7 @@ class TCMIntent(ClickModelParam):
     
     NAME = "intent"
 
-    def update_values(self, param_values, click):
+    def update_value(self, param_values, click):
         pass
 
 
@@ -204,7 +213,7 @@ class TCMAnother(ClickModelParam):
     
     NAME = "another"
 
-    def update_values(self, param_values, click):
+    def update_value(self, param_values, click):
         pass
 
 
@@ -219,7 +228,7 @@ class TCMFreshness(ClickModelParam):
     
     NAME = "fresh"
 
-    def update_values(self, param_values, click):
+    def update_value(self, param_values, click):
         pass
 
 
@@ -300,7 +309,7 @@ class TCMIntentWrapper(ClickModelParamWrapper):
 
 class TCMAnotherWrapper(ClickModelParamWrapper):
 
-    # Shape: (N_query, 1)
+    # Shape: (Sessions, 1)
 
     def init_param_rule(self, init_param_func, **kwargs):
         """
