@@ -48,11 +48,11 @@ def parse_wsdm_sessions(sessions_filename):
 
 def main(train_filename):
 
-    sessions_dict = parse_yandex_sessions(train_filename, 100)
+    sessions_dict = parse_yandex_sessions(train_filename, 20)
 
     classes = [
         TCM,
-        # UBM,
+        UBM,
         # SimpleDCM,
         # SimpleDBN,
         # DBN,
@@ -74,7 +74,7 @@ def main(train_filename):
         print click_model
 
         print "Log-likelihood and perplexity"
-        # print click_model.test(test_sessions)
+        print click_model.test(sessions)
         print ""
 
 

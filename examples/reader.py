@@ -3,16 +3,17 @@ from session.Session import Session, Result
 import numpy as np
 from collections import defaultdict
 
+
 def transform_to_tasks(sessions):
-    #time_interval = 430  NOTE(Luka): Taken from Piwowarski 2009, Mining User Web Search Activity... according to TCM Paper
-                        # Should be in seconds however Yandex click log does not add this information..
-                        # This means all queries with same session_id will be a task.
-                        # Also have no way to measure similarity between queries.
-                        # However we can assume that Yandex has made session_ids already into tasks according to website
+    # time_interval = 430  NOTE(Luka): Taken from Piwowarski 2009, Mining User Web Search Activity... according to TCM Paper
+    # Should be in seconds however Yandex click log does not add this information..
+    # This means all queries with same session_id will be a task.
+    # Also have no way to measure similarity between queries.
+    # However we can assume that Yandex has made session_ids already into tasks according to website
     return sessions.values()
 
 
-def parse_yandex_sessions(sessions_filename, max_sessions = None, split_fraction = 0.75):
+def parse_yandex_sessions(sessions_filename, max_sessions=None, split_fraction=0.75):
     """
         Parse Yandex-sessions formatted as found here: 'http://imat-relpred.yandex.ru/en/datasets'
 
@@ -27,12 +28,13 @@ def parse_yandex_sessions(sessions_filename, max_sessions = None, split_fraction
         Returns list of sessions
 
     """
-    sessions_file = open(sessions_filename,"r")
+    sessions_file = open(sessions_filename, "r")
     session_dict = defaultdict(list)
     count = 0
-    for line_n,line in enumerate(sessions_file):
+    another_counter = 0
+    for line_n, line in enumerate(sessions_file):
 
-        #NOTE(Luka): Limit the amount of lines to ease the development work because the whole file has 14.5 Million Sessions-lines and 19.5 Million Clicks-lines.
+        # NOTE(Luka): Limit the amount of lines to ease the development work because the whole file has 14.5 Million Sessions-lines and 19.5 Million Clicks-lines.
         session_str = line.strip().split('\t')
         session_id = session_str[0]
         time = session_str[1]
@@ -46,12 +48,13 @@ def parse_yandex_sessions(sessions_filename, max_sessions = None, split_fraction
             for doc in docs:
                 web_result = Result(doc, -1, 0)
                 session.add_web_result(web_result)
-            
+
             if count >= max_sessions:
                 break
-            
+
             session_dict[session_id].append(session)
-            count += 1
+            # count += 1
+            count = len(session_dict)
 
         if type_action is "C":
             doc = session_str[3]
@@ -66,8 +69,9 @@ def parse_yandex_sessions(sessions_filename, max_sessions = None, split_fraction
                 #NOTE(Luka): Click not found might be artifact or because clicked result is after clipped results.
                 #print "Could not find {} for session {}".format(doc,session_id)
                 pass
-    
+
     return session_dict
+
 
 if __name__ == "__main__":
     if not len(sys.argv) == 2:
@@ -76,7 +80,7 @@ if __name__ == "__main__":
 
     max_sessions = 1000
     fn = sys.argv[1]
-    sessions_dict = parse_yandex_sessions(fn,max_sessions)
+    sessions_dict = parse_yandex_sessions(fn, max_sessions)
     tasks = transform_to_tasks(sessions_dict)
     print sessions_dict['67']
-    print '#Tasks:\t',len(tasks)
+    print '#Tasks:\t', len(tasks)
