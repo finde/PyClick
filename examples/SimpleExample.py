@@ -33,9 +33,9 @@ def main():
 
     classes = [
         TCM,
-        DBN,
-        DCM,
         UBM,
+        DCM,
+        DBN,
         SimpleDCM,
         SimpleDBN,
         # FCM,
