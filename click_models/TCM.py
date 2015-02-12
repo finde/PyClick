@@ -68,7 +68,7 @@ class TCM(ClickModel):
     def get_freshness(self, task):
 
         freshness = dict()
-        queries = [session.query for session in task]
+        # queries = [session.query for session in task]
         for session_index, session in enumerate(task):
             freshness[session_index] = []
             for result in session.web_results:
