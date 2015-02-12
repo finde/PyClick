@@ -51,10 +51,17 @@ def parse_yandex_sessions(sessions_filename, max_sessions=None, split_fraction=0
 
             if count >= max_sessions:
                 break
+            
+            
+            if session_dict[session_id]:
+                last_session_same_id = session_dict[session_id][-1]
+                if last_session_same_id.query  == session.query:
+                    if [web.object for web in last_session_same_id.web_results] == [web.object for web in session.web_results]:
+                       continue
 
             session_dict[session_id].append(session)
-            # count += 1
-            count = len(session_dict)
+            count += 1
+
 
         if type_action is "C":
             doc = session_str[3]

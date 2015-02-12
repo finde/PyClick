@@ -8,14 +8,10 @@ import math
 import sys
 from abc import abstractmethod
 import json
-from click_models.Constants import MAX_DOCS_PER_QUERY
+from click_models.Constants import MAX_DOCS_PER_QUERY, MAX_ITERATIONS, PRETTY_LOG
 
 
 __author__ = 'Ilya Markov'
-
-
-PRETTY_LOG = True
-MAX_ITERATIONS = 40
 
 
 class ClickModel(object):
