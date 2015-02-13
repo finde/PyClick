@@ -36,26 +36,16 @@ class TCM(ClickModel):
             return
 
         self.params = self.init_params(self.get_prior_values())
-
-<<<<<<< HEAD
         #self.param_helper.set_intent(self.params, tasks)
         
-=======
-        self.param_helper.set_intent(self.params, tasks)
-
->>>>>>> 160272318afba585ed88139ecc9f615d0ac73bfb
         for iteration_count in xrange(MAX_ITERATIONS):
-            self.params = self.get_updated_params(tasks, self.params)
+            self.params = self.get_updated_params(tasks, self.init_params(self.get_prior_values()))
 
             if not PRETTY_LOG:
-<<<<<<< HEAD
                 print >>sys.stderr, 'Iteration: %d, LL: %.10f' % (iteration_count + 1, self.get_loglikelihood(tasks))
             
             print TCMIntent.NAME + " " + str(self.params[TCMIntent.NAME].get_param(0,0).get_value())
             print TCMFreshness.NAME + " " + str(self.params[TCMFreshness.NAME].get_param(0,0).get_value())
-=======
-                print >> sys.stderr, 'Iteration: %d, LL: %.10f' % (iteration_count + 1, self.get_loglikelihood(tasks))
->>>>>>> 160272318afba585ed88139ecc9f615d0ac73bfb
 
 
     def get_updated_params(self, tasks, priors):
@@ -67,7 +57,7 @@ class TCM(ClickModel):
 
                 if not hasattr(session, 'freshness'):
                     if self.freshness is None:
-                        self.freshness = self.get_freshness(task)
+                        self.freshness = self.get_previous_examination_chance(task)
                     session.freshness = self.freshness[i]
 
                 for rank, result in enumerate(session.web_results):
@@ -79,23 +69,30 @@ class TCM(ClickModel):
         return updated_params
 
 
-    def get_freshness(self, task):
-
-        freshness = dict()
+    def get_previous_examination_chance(self, task):
+        #P(H_ij = 1)
+        previous_examination_chance = dict()
+        beta = self.params[TCMExamination.NAME]
         # queries = [session.query for session in task]
         for session_index, session in enumerate(task):
-            freshness[session_index] = []
+            previous_examination_chance[session_index] = []
             for result in session.web_results:
-                for session_2 in task[:session_index]:
-                    if result.object in [r.object for r in session_2.web_results]:
-                        already_shown = True
+                for session_index_2, session_2 in enumerate(task[:session_index]):
+                    results = [r.object for r in session.web_results]
+                    if result.object in results:
+                        j = results.index(result.object)
+                        beta_j = beta.get_param(session_2, j).get_value()
+                        if previous_examination_chance[session_index_2][j] == 0:
+                            already_shown = beta_j
+                        else:
+                            already_shown = beta_j * previous_examination_chance[session_index_2][j]
                         break
                 else:
-                    already_shown = False
+                    already_shown = 0
 
-                freshness[session_index].append(already_shown)
+                previous_examination_chance[session_index].append(already_shown)
 
-        return freshness
+        return previous_examination_chance
 
 
     def get_p_click(self, param_values):
@@ -106,10 +103,7 @@ class TCM(ClickModel):
 
         freshness = param_values['freshness']
 
-        if freshness:
-            f_ij = 1
-        else:
-            f_ij = alpha_3
+        f_ij = freshness * alpha_3 + (1-freshness)
 
         p_click = alpha_1 * beta * f_ij * r_d
         return p_click
@@ -139,7 +133,7 @@ class TCM(ClickModel):
         loglikelihood = 0
         total_sessions = 0
         for task in tasks:
-            freshness = self.get_freshness(task)
+            freshness = self.get_previous_examination_chance(task)
             for s_idx, session in enumerate(task):
                 log_click_probs = self.get_log_click_probs(session, freshness[s_idx])
                 loglikelihood += sum(log_click_probs) / len(log_click_probs)
@@ -154,7 +148,7 @@ class TCM(ClickModel):
         perplexity_at_rank = [0.0] * MAX_DOCS_PER_QUERY
         total_session = 0
         for task in tasks:
-            freshness = self.get_freshness(task)
+            freshness = self.get_previous_examination_chance(task)
             for s_idx, session in enumerate(task):
                 log_click_probs = self.get_log_click_probs(session, freshness[s_idx])
                 for rank, log_click_prob in enumerate(log_click_probs):
@@ -177,7 +171,7 @@ class TCM(ClickModel):
         alpha_3 = self.params[TCMFreshness.NAME]
         r_d = self.params[TCMRelevance.NAME]
 
-        freshness = self.get_freshness(task)
+        freshness = self.get_previous_examination_chance(task)
 
         prob_task = []
 
@@ -190,10 +184,7 @@ class TCM(ClickModel):
                 beta_j = beta.get_param(session, j).get_value()
                 r_ij = r_d.get_param(session, j).get_value()
 
-                if freshness[s_idx][j]:
-                    f_ij = 1
-                else:
-                    f_ij = alpha_3.get_param(session, j).get_value()
+                f_ij = alpha_3.get_param(session, j).get_value() * freshness[s_idx][j] + (1-freshness[s_idx][j])
 
                 p_click = alpha_1_value * beta_j * r_ij * f_ij
                 prob_session.append(p_click)
@@ -221,21 +212,14 @@ class TCM(ClickModel):
         return {
             TCMRelevance.NAME: 0.5,
             TCMExamination.NAME: [0.5 for i in xrange(MAX_DOCS_PER_QUERY)],
-            TCMIntent.NAME: 0.9,
-            TCMFreshness.NAME: 0.9,
+            TCMIntent.NAME: 0.5,
+            TCMFreshness.NAME: 0.5,
             TCMLastQuery.NAME: 0.5
         }
 
 
 class TCMParamHelper(object):
-    def set_intent(self, params, tasks):
-        intent = params[TCMIntent.NAME].get_param(0, 0)
-        for task in tasks:
-            for session in task:
-                if any(session.get_clicks()):
-                    intent.numerator += 1
-                intent.denominator += 1
-
+    pass
 
 class TCMRelevance(ClickModelParam):
     """
@@ -252,11 +236,8 @@ class TCMRelevance(ClickModelParam):
         alpha_3 = param_values[TCMFreshness.NAME]
         freshness = param_values['freshness']
         beta_j = param_values[TCMExamination.NAME]
-
-        if freshness:
-            f_ij = 1
-        else:
-            f_ij = alpha_3
+        
+        f_ij = freshness * alpha_3 + (1-freshness)
 
         if click:
             self.numerator += 1
@@ -283,10 +264,8 @@ class TCMExamination(ClickModelParam):
         freshness = param_values['freshness']
         beta_j = param_values[TCMExamination.NAME]
 
-        if freshness:
-            f_ij = 1
-        else:
-            f_ij = alpha_3
+        f_ij = freshness * alpha_3 + (1-freshness)
+
 
         if click:
             self.numerator += 1
@@ -315,10 +294,8 @@ class TCMIntent(ClickModelParam):
         freshness = param_values['freshness']
         beta_j = param_values[TCMExamination.NAME]
 
-        if freshness:
-            f_ij = 1
-        else:
-            f_ij = alpha_3
+        f_ij = freshness * alpha_3 + (1-freshness)
+
         
         if click:
             self.numerator += 1
@@ -356,7 +333,6 @@ class TCMFreshness(ClickModelParam):
         self.denominator += 1
 
 
-<<<<<<< HEAD
 class TCMLastQuery(ClickModelParam):
     """
         Freshness of document: fresh = P(F_ij | H_ij). alpha3
@@ -371,8 +347,6 @@ class TCMLastQuery(ClickModelParam):
     def update_value(self, param_values, click):
         pass
 
-=======
->>>>>>> 160272318afba585ed88139ecc9f615d0ac73bfb
 class TCMExaminationWrapper(ClickModelParamWrapper):
     # Shape: (max_rank,1)
     # Max rank in Yandex is 10
