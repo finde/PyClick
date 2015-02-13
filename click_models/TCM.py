@@ -28,6 +28,27 @@ class TCM(ClickModel):
         }
         return params
 
+    def train(self, tasks):
+        """
+            Trains the model.
+        """
+        if len(tasks) <= 0:
+            print >> sys.stderr, "The number of training sessions is zero."
+            return
+
+        self.params = self.init_params(self.get_prior_values())
+        
+        #self.param_helper.set_intent(self.params, tasks)
+        
+        for iteration_count in xrange(MAX_ITERATIONS):
+            self.params = self.get_updated_params(tasks, self.init_params(self.get_prior_values()))
+
+            if not PRETTY_LOG:
+                print >>sys.stderr, 'Iteration: %d, LL: %.10f' % (iteration_count + 1, self.get_loglikelihood(tasks))
+            
+            print TCMIntent.NAME + " " + str(self.params[TCMIntent.NAME].get_param(0,0).get_value())
+            print TCMFreshness.NAME + " " + str(self.params[TCMFreshness.NAME].get_param(0,0).get_value())
+
     def get_updated_params(self, tasks, priors):
         updated_params = priors
 
@@ -194,7 +215,6 @@ class TCM(ClickModel):
             TCMExamination.NAME: 0.5,
             TCMIntent.NAME: 0.5,
             TCMFreshness.NAME: 0.5
-        }
 
 
 class TCMParamHelper(object):
