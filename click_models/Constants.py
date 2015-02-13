@@ -7,6 +7,6 @@ __author__ = 'Ilya Markov'
 
 
 MAX_DOCS_PER_QUERY = 10
-MAX_ITERATIONS = 200
+MAX_ITERATIONS = 40
 PRETTY_LOG = True 
 
