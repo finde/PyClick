@@ -1,54 +1,26 @@
-Click Models for Web and Aggregated Search
+Information Retrieval 2 - Evluation of Click Models
 ====
+
+This project is a fork of [PyClick](http://www.github.com/markovi/PyClick). All information about PyClick can be found there.
 
 ## How to Use
 
 #### Installation
-To install PyClick, run the following command from the PyClick root:
+To install PyClick, run the following command from the project's root:
 
  ```python setup.py install```
 
-#### Examples
-Examples of PyClick usage are in the ```examples``` folder, with the corresponding data located in ```examples/data```. To run an example ```X.py```, use the following command:
-
-```python X.py train_data test_data```
-
-or
-
-```./X.py train_data test_data```
-
-In the latter case, you may need to change permissions using ```chmod u+x X.py```.
-
-#### SimpleExample.py
-```SimpleExample.py``` takes train and test files as an input, trains several click models, outputs the trained parameters and calculates the log-likelihood, perplexity and position perplexity using test data.
-
-To run ```SimpleExample.py```, use the following:
-
-```python SimpleExample.py data/oneQueryTrain oneQueryTest```
-
-or
-
-```./SimpleExample.py data/oneQueryTrain oneQueryTest```
-
-The train/test file format is:
-```query_id doc1_id,doc2_id,...,docn_id : clicked_doc_id1,clicked_doc_id2,...;```
+It currently additionally to PyClick implements the TCM Model
+* **TCM**: Zhang, Yuchen and Chen, Weizhu and Wang, Dong and Yang, Qiang. **User-click Modeling for Understanding and Predicting Search-behavior.**  In *Proceedings of KDD'11*, pages 1388 - 1396, 2011.
 
 
-## Implemented Models
-The code currently implements the following click models:
-* **S(imple)-DCM**: Guo, Fan and Liu, Chao and Wang, Yi Min. **Efficient multiple-click models in web search.** In *Proceedings of WSDM*, pages 124-131, 2009. The parameter estimation procedure as in Equations 13 and 14: only documents above the last clicked rank are considered.
-* **DCM**: The same as above, but all documents are considered when estimating parameters.
-* **S(imple)-DBN**: Chapelle, Olivier and Zhang, Ya. **A dynamic bayesian network click model for web search ranking.** In *Proceedings of WWW*, pages 1-10, 2009. Parameters are estimated as in Algorithm 1 (gamma = 1).
-* **DBN**: The same as above with the probability of continuation gamma.
-* **UBM**: Dupret, Georges E. and Piwowarski, Benjamin. **A user browsing model to predict search engine click data from past observations.** In *Proceedings of SIGIR*, pages 331-338, 2008.
-* **FCM**: Chen, Danqi and Chen, Weizhu and Wang, Haixun and Chen, Zheng and Yang, Qiang. **Beyond ten blue links: enabling user click modeling in federated web search.** In *Proceedings of WSDM*, pages 463-472, 2012.
-* **VCM**: Wang, Chao and Liu, Yiqun and Zhang, Min and Ma, Shaoping and Zheng, Meihong and Qian, Jing and Zhang, Kuo. **Incorporating vertical results into search click models.** In *Proceedings of SIGIR*, pages 503-512, 2013.
+#### Example
+To compare TCM with the other implemented models use:
+ 
+ ```python example/YandexExample.py data_set number_of_sessions```
 
-Each model is implemented in two modifications:
-* A basic model, where relevance is learnt from query-logs.
-* A model with the "Rel" suffix (e.g., UBMRel), where relevance judgements are used to determine the relevance grade for each query-document pair. The probability of relevance for each grade is then learnt from query-logs.
+This will compare the models on a Yandex Click log, for which the description is found [here](http://imat-relpred.yandex.ru/en/datasets). This dataset is not included here. The number_of_sessions variable will default to 1000
 
 
 ## Acknowledgements
-* The project is partially funded by the grant P2T1P2\_152269 of the Swiss National Science Foundation.
-* Initially inspired by the [clickmodels](https://github.com/varepsilon/clickmodels) project.
+* This project is supervised by [Ilya Markovi](http://github.com/markovi) and [Artem Grotov](http://github.com/agrotov)
