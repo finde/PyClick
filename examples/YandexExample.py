@@ -28,7 +28,7 @@ __author__ = 'Luka Stout and Finde Xumara'
 def main(data_file, n_sessions):
     this_directory = os.path.dirname(os.path.realpath(__file__))
 
-    sessions_dict = parse_yandex_sessions(os.path.join(this_directory,data_file),n_sessions)
+    sessions_dict = parse_yandex_sessions(os.path.join(this_directory,data_file),int(n_sessions))
 
     train, test = train_test_split(sessions_dict.values())
 
