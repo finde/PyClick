@@ -20,13 +20,11 @@ class TCM(ClickModel):
     def init_params(self, init_param_values):
         self.param_helper = TCMParamHelper()
         params = {
-            TCMExamination.NAME: TCMExaminationWrapper(init_param_values, TCMExamination.default(),
-                                                       param_helper=self.param_helper),
-            TCMRelevance.NAME: TCMRelevanceWrapper(init_param_values, TCMRelevance.default(),
-                                                   param_helper=self.param_helper),
+            TCMExamination.NAME: TCMExaminationWrapper(init_param_values, TCMExamination.default(), param_helper=self.param_helper),
+            TCMRelevance.NAME: TCMRelevanceWrapper(init_param_values, TCMRelevance.default(), param_helper=self.param_helper),
             TCMIntent.NAME: TCMIntentWrapper(init_param_values, TCMIntent.default(), param_helper=self.param_helper),
-            TCMFreshness.NAME: TCMFreshnessWrapper(init_param_values, TCMFreshness.default(),
-                                                   param_helper=self.param_helper)
+            TCMFreshness.NAME: TCMFreshnessWrapper(init_param_values, TCMFreshness.default(), param_helper=self.param_helper),
+            TCMLastQuery.NAME: TCMLastQueryWrapper(init_param_values, TCMLastQuery.default(), param_helper=self.param_helper)
         }
         return params
 
@@ -40,15 +38,18 @@ class TCM(ClickModel):
 
         self.params = self.init_params(self.get_prior_values())
 
-        self.param_helper.set_intent(self.params, tasks)
+        #self.param_helper.set_intent(self.params, tasks)
         
         for iteration_count in xrange(MAX_ITERATIONS):
             self.params = self.get_updated_params(tasks, self.params)
 
             if not PRETTY_LOG:
                 print >>sys.stderr, 'Iteration: %d, LL: %.10f' % (iteration_count + 1, self.get_loglikelihood(tasks))
+            
+            print TCMIntent.NAME + " " + str(self.params[TCMIntent.NAME].get_param(0,0).get_value())
+            print TCMFreshness.NAME + " " + str(self.params[TCMFreshness.NAME].get_param(0,0).get_value())
 
-    
+
     def get_updated_params(self, tasks, priors):
         updated_params = priors
 
@@ -208,8 +209,9 @@ class TCM(ClickModel):
         return {
             TCMRelevance.NAME: 0.5,
             TCMExamination.NAME: [0.5 for i in xrange(MAX_DOCS_PER_QUERY)],
-            TCMIntent.NAME: 0.5,
-            TCMFreshness.NAME: 0.5,
+            TCMIntent.NAME: 0.9,
+            TCMFreshness.NAME: 0.9,
+            TCMLastQuery.NAME: 0.5
         }
 
 
@@ -295,7 +297,25 @@ class TCMIntent(ClickModelParam):
     # Intent is set before the EM steps using MLE
     # So is not updated
     def update_value(self, param_values, click):
-        pass
+        r_ij = param_values[TCMRelevance.NAME]
+        alpha_1 = param_values[TCMIntent.NAME]
+        alpha_3 = param_values[TCMFreshness.NAME]
+        freshness = param_values['freshness']
+        beta_j = param_values[TCMExamination.NAME]
+
+        if freshness:
+            f_ij = 1
+        else:
+            f_ij = alpha_3
+        
+        if click:
+            self.numerator += 1
+        else:
+            num = alpha_1 - alpha_1 * beta_j * f_ij * r_ij
+            denom = 1 - alpha_1 * beta_j * f_ij * r_ij
+            self.numerator += num / denom 
+        self.denominator += 1
+
 
 
 class TCMFreshness(ClickModelParam):
@@ -324,6 +344,19 @@ class TCMFreshness(ClickModelParam):
         self.denominator += 1
 
 
+class TCMLastQuery(ClickModelParam):
+    """
+        Freshness of document: fresh = P(F_ij | H_ij). alpha3
+        H_ij = Previous examination of doc at rank j in session (Binary)
+
+    """
+
+    #NOTE(Luka): Depends on Previous examination (H_ij)
+    
+    NAME = "last_query"
+
+    def update_value(self, param_values, click):
+        pass
 
 class TCMExaminationWrapper(ClickModelParamWrapper):
 
@@ -421,5 +454,24 @@ class TCMFreshnessWrapper(ClickModelParamWrapper):
     def get_params_from_JSON(self, json_str):
         pass
 
+class TCMLastQueryWrapper(ClickModelParamWrapper):
+    # Shape: (N_queries,N_docs)
+    # See TCMRelevance for explanation
+
+    def init_param_rule(self, init_param_func, **kwargs):
+        """
+            Defines the way of initializing parameters.
+        """
+        return init_param_func(**kwargs)
+
+    def get_param(self, session, rank, **kwargs):
+        """
+            Returns the value of the parameter for a given query and document.
+        """
+
+        return self.params
+    
+    def get_params_from_JSON(self, json_str):
+        pass
 
 

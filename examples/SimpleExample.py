@@ -22,20 +22,21 @@ from sklearn.cross_validation import train_test_split
 __author__ = 'Luka Stout and Finde Xumara'
 
 
+N_SESSIONS = 1000
+
 def main():
     
     this_directory = os.path.dirname(os.path.realpath(__file__))
 
-    sessions_dict = parse_yandex_sessions(os.path.join(this_directory,'data','YandexClicks-sample.txt'),10000)
+    sessions_dict = parse_yandex_sessions(os.path.join(this_directory,'data','YandexClicks-sample.txt'),N_SESSIONS)
     train, test = train_test_split(sessions_dict.values())
 
     classes = [
         TCM,
-        UBM,
         # SimpleDCM,
         # SimpleDBN,
         # DBN,
-        # UBM
+        UBM
     ]
 
     for click_model_class in classes:

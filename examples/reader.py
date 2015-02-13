@@ -13,7 +13,7 @@ def transform_to_tasks(sessions):
     return sessions.values()
 
 
-def parse_yandex_sessions(sessions_filename, max_sessions=None, split_fraction=0.75):
+def parse_yandex_sessions(sessions_filename, max_sessions=None):
     """
         Parse Yandex-sessions formatted as found here: 'http://imat-relpred.yandex.ru/en/datasets'
 
