@@ -25,12 +25,10 @@ from sklearn.cross_validation import train_test_split
 __author__ = 'Luka Stout and Finde Xumara'
 
 
-N_SESSIONS = 1000
-
-def main():
+def main(data_file, n_sessions):
     this_directory = os.path.dirname(os.path.realpath(__file__))
 
-    sessions_dict = parse_yandex_sessions(os.path.join(this_directory,'data','YandexClicks-sample.txt'),N_SESSIONS)
+    sessions_dict = parse_yandex_sessions(os.path.join(this_directory,data_file),n_sessions)
 
     train, test = train_test_split(sessions_dict.values())
 
@@ -70,4 +68,9 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    data = sys.argv[1]
+    if len(sys.argv) == 3:
+        sessions = sys.argv[2]
+    else:
+        sessions = 1000
+    main(data, sessions)
