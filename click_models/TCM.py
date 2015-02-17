@@ -16,15 +16,17 @@ __author__ = 'Luka Stout and Finde Xumara'
 
 
 class TCM(ClickModel):
-
-    
     def init_params(self, init_param_values):
         self.param_helper = TCMParamHelper()
         params = {
-            TCMExamination.NAME: TCMExaminationWrapper(init_param_values, TCMExamination.default(), param_helper=self.param_helper),
-            TCMRelevance.NAME: TCMRelevanceWrapper(init_param_values, TCMRelevance.default(), param_helper=self.param_helper),
-            TCMIntent.NAME: TCMSingleVariableWrapper(init_param_values, TCMIntent.default(), param_helper=self.param_helper),
-            TCMFreshness.NAME: TCMSingleVariableWrapper(init_param_values, TCMFreshness.default(), param_helper=self.param_helper),
+            TCMExamination.NAME: TCMExaminationWrapper(init_param_values, TCMExamination.default(),
+                                                       param_helper=self.param_helper),
+            TCMRelevance.NAME: TCMRelevanceWrapper(init_param_values, TCMRelevance.default(),
+                                                   param_helper=self.param_helper),
+            TCMIntent.NAME: TCMSingleVariableWrapper(init_param_values, TCMIntent.default(),
+                                                     param_helper=self.param_helper),
+            TCMFreshness.NAME: TCMSingleVariableWrapper(init_param_values, TCMFreshness.default(),
+                                                        param_helper=self.param_helper),
         }
         return params
 
@@ -37,17 +39,17 @@ class TCM(ClickModel):
             return
 
         self.params = self.init_params(self.get_prior_values())
-        
-        #self.param_helper.set_intent(self.params, tasks)
-        
+
+        # self.param_helper.set_intent(self.params, tasks)
+
         for iteration_count in xrange(MAX_ITERATIONS):
             self.params = self.get_updated_params(tasks, self.init_params(self.get_prior_values()))
 
             if not PRETTY_LOG:
-                print >>sys.stderr, 'Iteration: %d, LL: %.10f' % (iteration_count + 1, self.get_loglikelihood(tasks))
-            
-            print TCMIntent.NAME + " " + str(self.params[TCMIntent.NAME].get_param(0,0).get_value())
-            print TCMFreshness.NAME + " " + str(self.params[TCMFreshness.NAME].get_param(0,0).get_value())
+                print >> sys.stderr, 'Iteration: %d, LL: %.10f' % (iteration_count + 1, self.get_loglikelihood(tasks))
+
+            print TCMIntent.NAME + " " + str(self.params[TCMIntent.NAME].get_param(0, 0).get_value())
+            print TCMFreshness.NAME + " " + str(self.params[TCMFreshness.NAME].get_param(0, 0).get_value())
 
     def get_updated_params(self, tasks, priors):
         updated_params = priors
@@ -71,7 +73,7 @@ class TCM(ClickModel):
 
 
     def get_previous_examination_chance(self, task):
-        #P(H_ij = 1)
+        # P(H_ij = 1)
         previous_examination_chance = dict()
         beta = self.params[TCMExamination.NAME]
         # queries = [session.query for session in task]
@@ -104,7 +106,7 @@ class TCM(ClickModel):
 
         freshness = param_values['freshness']
 
-        f_ij = freshness * alpha_3 + (1-freshness)
+        f_ij = freshness * alpha_3 + (1 - freshness)
 
         p_click = alpha_1 * beta * f_ij * r_d
         return p_click
@@ -168,7 +170,7 @@ class TCM(ClickModel):
 
         beta = self.params[TCMExamination.NAME]
         alpha_1_value = self.params[TCMIntent.NAME].get_param(0, 0).get_value()
-        alpha_2 = self.params[TCMAnother.NAME]
+        # alpha_2 = self.params[TCMAnother.NAME]
         alpha_3 = self.params[TCMFreshness.NAME]
         r_d = self.params[TCMRelevance.NAME]
 
@@ -185,7 +187,7 @@ class TCM(ClickModel):
                 beta_j = beta.get_param(session, j).get_value()
                 r_ij = r_d.get_param(session, j).get_value()
 
-                f_ij = alpha_3.get_param(session, j).get_value() * freshness[s_idx][j] + (1-freshness[s_idx][j])
+                f_ij = alpha_3.get_param(session, j).get_value() * freshness[s_idx][j] + (1 - freshness[s_idx][j])
 
                 p_click = alpha_1_value * beta_j * r_ij * f_ij
                 prob_session.append(p_click)
@@ -215,10 +217,12 @@ class TCM(ClickModel):
             TCMExamination.NAME: 0.5,
             TCMIntent.NAME: 0.5,
             TCMFreshness.NAME: 0.5
+        }
 
 
 class TCMParamHelper(object):
     pass
+
 
 class TCMRelevance(ClickModelParam):
     """
@@ -235,8 +239,8 @@ class TCMRelevance(ClickModelParam):
         alpha_3 = param_values[TCMFreshness.NAME]
         freshness = param_values['freshness']
         beta_j = param_values[TCMExamination.NAME]
-        
-        f_ij = freshness * alpha_3 + (1-freshness)
+
+        f_ij = freshness * alpha_3 + (1 - freshness)
 
         if click:
             self.numerator += 1
@@ -263,8 +267,7 @@ class TCMExamination(ClickModelParam):
         freshness = param_values['freshness']
         beta_j = param_values[TCMExamination.NAME]
 
-        f_ij = freshness * alpha_3 + (1-freshness)
-
+        f_ij = freshness * alpha_3 + (1 - freshness)
 
         if click:
             self.numerator += 1
@@ -293,17 +296,15 @@ class TCMIntent(ClickModelParam):
         freshness = param_values['freshness']
         beta_j = param_values[TCMExamination.NAME]
 
-        f_ij = freshness * alpha_3 + (1-freshness)
+        f_ij = freshness * alpha_3 + (1 - freshness)
 
-        
         if click:
             self.numerator += 1
         else:
             num = alpha_1 - alpha_1 * beta_j * f_ij * r_ij
             denom = 1 - alpha_1 * beta_j * f_ij * r_ij
-            self.numerator += num / denom 
+            self.numerator += num / denom
         self.denominator += 1
-
 
 
 class TCMFreshness(ClickModelParam):
@@ -333,7 +334,6 @@ class TCMFreshness(ClickModelParam):
 
 
 class TCMExaminationWrapper(ClickModelParamWrapper):
-
     def init_param_rule(self, init_param_func, **kwargs):
         """
             Defines the way of initializing parameters.
@@ -353,7 +353,6 @@ class TCMExaminationWrapper(ClickModelParamWrapper):
 
 
 class TCMRelevanceWrapper(ClickModelParamWrapper):
-
     def init_param_rule(self, init_param_func, **kwargs):
         """
             Defines the way of initializing parameters.
