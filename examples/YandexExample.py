@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2014 Luka Stout and Finde Xumara
+# Copyright (C) 2015 Luka Stout and Finde Xumara
 #
 # Full copyright notice can be found in LICENSE.
 #
@@ -21,6 +21,7 @@ import time
 from reader import parse_yandex_sessions
 
 from sklearn.cross_validation import train_test_split
+from tabulate import tabulate
 
 __author__ = 'Luka Stout and Finde Xumara'
 
@@ -28,7 +29,7 @@ __author__ = 'Luka Stout and Finde Xumara'
 def main(data_file, n_sessions):
     this_directory = os.path.dirname(os.path.realpath(__file__))
 
-    sessions_dict = parse_yandex_sessions(os.path.join(this_directory,data_file),int(n_sessions))
+    sessions_dict = parse_yandex_sessions(os.path.join(this_directory, data_file), int(n_sessions))
 
     train, test = train_test_split(sessions_dict.values())
 
@@ -43,6 +44,8 @@ def main(data_file, n_sessions):
         # VCM
     ]
 
+    headers = ['Click Model', 'Log-likelihood', 'Perplexity', 'Computation Time']
+    tableData = []
     for click_model_class in classes:
 
         if not click_model_class.__name__ == TCM.__name__:
@@ -57,7 +60,8 @@ def main(data_file, n_sessions):
 
         start_time = time.time()
         click_model.train(_train)
-        print("--- %s seconds ---" % (time.time() - start_time))
+        training_time = (time.time() - start_time)
+        print("--- %s seconds ---" % training_time)
 
         print click_model
 
@@ -65,6 +69,13 @@ def main(data_file, n_sessions):
         log_likelihood, perplexity, perplexity_at_rank = click_model.test(_test)
         print log_likelihood, perplexity
         print ""
+
+        tableData.append([click_model_class.__name__, log_likelihood, perplexity, training_time])
+
+    _format = 'grid'
+    print '\n\nSUMMARY\n=========='
+    print 'Number of queries: ', n_sessions
+    print tabulate(tableData, headers, tablefmt=_format)
 
 
 if __name__ == '__main__':
