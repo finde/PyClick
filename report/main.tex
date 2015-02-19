@@ -1,0 +1,59 @@
+\documentclass{article} % For LaTeX2e
+\usepackage{nips13submit_e,times}
+\usepackage{hyperref}
+\usepackage{algorithmicx}
+\usepackage[ruled,vlined]{algorithm2e}
+\usepackage{url, tikz}
+\usepackage[justification=centering]{subcaption}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{mathtools}
+\usepackage{pgfplots}
+
+
+%\documentstyle[nips13submit_09,times,art10]{article} % For LaTeX 2.09
+
+\newenvironment{loglisting}[1][htb]
+{\renewcommand{\algorithmcfname}{Log listing}% Update algorithm name
+  \begin{algorithm}[#1]%
+}{\end{algorithm}}
+
+\makeatletter
+\algrenewcommand\ALG@beginalgorithmic{\ttfamily}
+\makeatother
+
+\title{
+Click models evaluations\\
+\small {(IR2 project)}
+}
+
+\author{
+Luka Stout\\
+\texttt{10616713} \\
+\And
+Finde Xumara \\
+\texttt{10690832} \\
+}
+
+\newcommand{\fix}{\marginpar{FIX}}
+\newcommand{\new}{\marginpar{NEW}}
+\newcommand{\comment}[1]{\textit{\color{red}{#1}}}
+
+\nipsfinalcopy % Uncomment for camera-ready version
+
+\begin{document}
+\nocite{*}
+\maketitle
+
+\input{1_introduction.tex}
+\input{2_methodology.tex}
+\input{3_evaluation.tex}
+\input{4_analysis.tex}
+\input{5_conclusions.tex}
+
+\clearpage
+
+\bibliography{references}{}
+\bibliographystyle{plain}
+
+\end{document}
