@@ -1,0 +1,34 @@
+% model_tcm.tex
+% TCM model
+
+%\beginpgfgraphicnamed{model-tcm}
+\begin{tikzpicture}
+
+  % Define nodes
+  \node[obs]                      (n) {$N_i$};
+  \node[latent, left=1.2cm of n]  (m) {$M_i$};
+  \node[obs, below=0.6cm of n]    (c) {$C_i$};
+  \node[latent, left=1.2cm of c]  (e) {$E_{i,j}$};
+  \node[latent, right=1.2cm of c] (r) {$R_{i,j}$};
+  \node[latent, below=0.6cm of c] (f) {$F_{i,j}$};
+  \node[latent, left=1.2cm of f]  (h) {$H_{i,j}$};
+  \node[latent, left=1.2cm of h]  (h_prime) {$H_{i,j}'$};
+  \node[latent, left=1.2cm of h, yshift=1.2cm]  (e_prime) {$E_{i,j}'$};
+
+  % Connect the nodes
+  \edge {m} {n,c} ; %
+  \edge {e,r,f} {c} ; %
+  \edge {h} {c} ; %
+  \edge {h_prime,e_prime} {h} ; %
+
+  % Plates
+  \plate [inner sep=.3cm] {p_n} {(e)(c)(r)(f)(h)} {$j=1,\dots,n$} ;
+  \plate [inner sep=.3cm] {p_m} {(m)(n)(p_n)} {$i=1,\dots,m$} ;
+
+\end{tikzpicture}
+%\endpgfgraphicnamed
+
+%%% Local Variables:
+%%% mode: tex-pdf
+%%% TeX-master: "example"
+%%% End:
