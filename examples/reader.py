@@ -44,7 +44,7 @@ def parse_yandex_sessions(sessions_filename, max_sessions=None):
             region = session_str[4]
             docs = session_str[5:]
 
-            session = Session(query)
+            session = Session(session_id, query, region = region)
             for doc in docs:
                 web_result = Result(doc, -1, 0)
                 session.add_web_result(web_result)
@@ -76,18 +76,26 @@ def parse_yandex_sessions(sessions_filename, max_sessions=None):
                 #NOTE(Luka): Click not found might be artifact or because clicked result is after clipped results.
                 #print "Could not find {} for session {}".format(doc,session_id)
                 pass
+    
+    return [s for t in session_dict.values() for s in t]
 
-    return session_dict
+def parse_yandex_relevances(relevances_filename):
+    relevances = dict()
+    with open(relevances_filename, "r") as f:
+        for row in f:
+            query_id, region_id, url, rel = row.split('\t')
+            if query_id not in relevances:
+                relevances[query_id] = dict()
+            query = relevances[query_id] 
+            
+            if region_id not in query:
+                query[region_id] = dict()
+            region = query[region_id]
+            
+            region[url] = rel
 
 
-if __name__ == "__main__":
-    if not len(sys.argv) == 2:
-        print "The format that should be used for executing the reader is `python YandexReader.py <query_log>`"
-        sys.exit()
 
-    max_sessions = 1000
-    fn = sys.argv[1]
-    sessions_dict = parse_yandex_sessions(fn, max_sessions)
-    tasks = transform_to_tasks(sessions_dict)
-    print sessions_dict['67']
-    print '#Tasks:\t', len(tasks)
+    return relevances
+
+

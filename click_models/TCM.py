@@ -16,6 +16,7 @@ __author__ = 'Luka Stout and Finde Xumara'
 
 
 class TCM(ClickModel):
+    
     def init_params(self, init_param_values):
         self.param_helper = TCMParamHelper()
         params = {
@@ -30,29 +31,35 @@ class TCM(ClickModel):
         }
         return params
 
-    def train(self, tasks):
+    def train(self, sessions):
         """
             Trains the model.
         """
+    
+        tasks = self._transform_sessions(sessions)
+
         if len(tasks) <= 0:
             print >> sys.stderr, "The number of training sessions is zero."
             return
 
         self.params = self.init_params(self.get_prior_values())
 
-        # self.param_helper.set_intent(self.params, tasks)
+        intent = self.param_helper.get_intent(self.params, tasks)
+
+        priors = self.get_prior_values()
+        priors[TCMIntent.NAME] = intent
 
         for iteration_count in xrange(MAX_ITERATIONS):
-            self.params = self.get_updated_params(tasks, self.init_params(self.get_prior_values()))
+            self.params = self.get_updated_params(tasks, self.init_params(priors))
 
             if not PRETTY_LOG:
                 print >> sys.stderr, 'Iteration: %d, LL: %.10f' % (iteration_count + 1, self.get_loglikelihood(tasks))
 
-            print TCMIntent.NAME + " " + str(self.params[TCMIntent.NAME].get_param(0, 0).get_value())
-            print TCMFreshness.NAME + " " + str(self.params[TCMFreshness.NAME].get_param(0, 0).get_value())
 
-    def get_updated_params(self, tasks, priors):
+    def get_updated_params(self, sessions, priors):
         updated_params = priors
+
+        tasks = self._transform_sessions(sessions)
 
         for task in tasks:
             self.freshness = None
@@ -132,9 +139,12 @@ class TCM(ClickModel):
         return log_click_probs
 
 
-    def get_loglikelihood(self, tasks):
+    def get_loglikelihood(self, sessions):
         loglikelihood = 0
         total_sessions = 0
+        
+        tasks = self._transform_sessions(sessions)
+
         for task in tasks:
             freshness = self.get_previous_examination_chance(task)
             for s_idx, session in enumerate(task):
@@ -144,12 +154,15 @@ class TCM(ClickModel):
         loglikelihood /= total_sessions
         return loglikelihood
 
-    def get_perplexity(self, tasks):
+    def get_perplexity(self, sessions):
         """
         Returns the perplexity and position perplexities for given sessions.
         """
         perplexity_at_rank = [0.0] * MAX_DOCS_PER_QUERY
         total_session = 0
+
+        tasks = self._transform_sessions(sessions)
+
         for task in tasks:
             freshness = self.get_previous_examination_chance(task)
             for s_idx, session in enumerate(task):
@@ -165,8 +178,12 @@ class TCM(ClickModel):
 
     def predict_click_probs(self, task):
         """
-            Predicts click probabilities for a given session
+            Predicts click probabilities for a given task
         """
+        
+
+        #This works on task, should work on session, how do? Can't really get freshness right?
+        raise NotImplementedError
 
         beta = self.params[TCMExamination.NAME]
         alpha_1_value = self.params[TCMIntent.NAME].get_param(0, 0).get_value()
@@ -218,10 +235,29 @@ class TCM(ClickModel):
             TCMIntent.NAME: 0.5,
             TCMFreshness.NAME: 0.5
         }
+    
 
+    def _transform_sessions(self, sessions):
+        task_dict = dict()
+        for session in sessions:
+            if session.id not in task_dict:
+                task_dict[session.id] = []
+            task = task_dict[session.id]
+            task.append(session)
+
+        return task_dict.values()
+        
 
 class TCMParamHelper(object):
-    pass
+    
+    def get_intent(self, params, tasks):
+        intent = params[TCMIntent.NAME].get_param(0, 0)
+        for task in tasks:
+            for session in task:
+                if any(session.get_clicks()):
+                    intent.numerator += 1
+                intent.denominator += 1
+        return intent.get_value()
 
 
 class TCMRelevance(ClickModelParam):
@@ -290,21 +326,22 @@ class TCMIntent(ClickModelParam):
     # Intent is set before the EM steps using MLE
     # So is not updated
     def update_value(self, param_values, click):
-        r_ij = param_values[TCMRelevance.NAME]
-        alpha_1 = param_values[TCMIntent.NAME]
-        alpha_3 = param_values[TCMFreshness.NAME]
-        freshness = param_values['freshness']
-        beta_j = param_values[TCMExamination.NAME]
+        #r_ij = param_values[TCMRelevance.NAME]
+        #alpha_1 = param_values[TCMIntent.NAME]
+        #alpha_3 = param_values[TCMFreshness.NAME]
+        #freshness = param_values['freshness']
+        #beta_j = param_values[TCMExamination.NAME]
 
-        f_ij = freshness * alpha_3 + (1 - freshness)
+        #f_ij = freshness * alpha_3 + (1 - freshness)
 
-        if click:
-            self.numerator += 1
-        else:
-            num = alpha_1 - alpha_1 * beta_j * f_ij * r_ij
-            denom = 1 - alpha_1 * beta_j * f_ij * r_ij
-            self.numerator += num / denom
-        self.denominator += 1
+        #if click:
+            #self.numerator += 1
+        #else:
+            #num = alpha_1 - alpha_1 * beta_j * f_ij * r_ij
+            #denom = 1 - alpha_1 * beta_j * f_ij * r_ij
+            #self.numerator += num / denom
+        #self.denominator += 1
+        pass
 
 
 class TCMFreshness(ClickModelParam):

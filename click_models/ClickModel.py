@@ -208,6 +208,14 @@ class ClickModel(object):
         """
         pass
 
+    @abstractmethod
+    def get_relevances(self, sessions):
+        """
+            Returns the predicted relevances for the given sessions
+            sessions -> list of relevances
+        """
+        pass
+
 
     @staticmethod
     def get_prior_values():

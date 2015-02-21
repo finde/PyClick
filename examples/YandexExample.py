@@ -17,8 +17,10 @@ from click_models.FCM import FCM
 from click_models.VCM import VCM
 from session.Session import *
 
+from evaluation.Evaluation import *
+
 import time
-from reader import parse_yandex_sessions
+from reader import parse_yandex_sessions, parse_yandex_relevances
 
 from sklearn.cross_validation import train_test_split
 from tabulate import tabulate
@@ -26,16 +28,16 @@ from tabulate import tabulate
 __author__ = 'Luka Stout and Finde Xumara'
 
 
-def main(data_file, n_sessions):
+def main(sessions_file, relevance_file, n_sessions):
     this_directory = os.path.dirname(os.path.realpath(__file__))
 
-    sessions_dict = parse_yandex_sessions(os.path.join(this_directory, data_file), int(n_sessions))
+    sessions_dict = parse_yandex_sessions(os.path.join(this_directory, sessions_file), int(n_sessions))
 
-    train, test = train_test_split(sessions_dict.values())
+    train, test = train_test_split(sessions_dict)
 
     classes = [
-        TCM,
         UBM,
+        TCM,
         DCM,
         DBN,
         SimpleDCM,
@@ -46,27 +48,26 @@ def main(data_file, n_sessions):
 
     headers = ['Click Model', 'Log-likelihood', 'Perplexity', 'Computation Time']
     tableData = []
-    for click_model_class in classes:
+    true_relevances = parse_yandex_relevances(os.path.join(this_directory, relevance_file))  
+    rel_pred = RelevancePrediction(true_relevances)
 
-        if not click_model_class.__name__ == TCM.__name__:
-            _train = [s for t in train for s in t]
-            _test = [s for t in test for s in t]
-        else:
-            _train = train
-            _test = test
+    for click_model_class in classes:
 
         print "==== %s ====" % click_model_class.__name__
         click_model = click_model_class(click_model_class.get_prior_values())
 
         start_time = time.time()
-        click_model.train(_train)
+        click_model.train(train)
         training_time = (time.time() - start_time)
         print("--- %s seconds ---" % training_time)
 
         print click_model
 
         print "Log-likelihood and perplexity"
-        log_likelihood, perplexity, perplexity_at_rank = click_model.test(_test)
+
+        print "RELEVANCE_PREDICTION:",rel_pred.evaluate(click_model, test)
+            
+        log_likelihood, perplexity, perplexity_at_rank = click_model.test(test)
         print log_likelihood, perplexity
         print ""
 
@@ -79,9 +80,10 @@ def main(data_file, n_sessions):
 
 
 if __name__ == '__main__':
-    data = sys.argv[1]
-    if len(sys.argv) == 3:
-        sessions = sys.argv[2]
+    session_data = sys.argv[1]
+    relevance_data = sys.argv[2]
+    if len(sys.argv) >= 4:
+        sessions = sys.argv[3]
     else:
         sessions = 1000
-    main(data, sessions)
+    main(session_data, relevance_data, sessions)

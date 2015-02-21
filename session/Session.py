@@ -8,11 +8,13 @@ class Session(object):
     """
     Represents a search session.
     """
-    def __init__(self, query):
+    def __init__(self, session_id, query, region = None):
         """
         Initializes a search session for a given query.
         """
+        self.id = session_id
         self.query = query
+        self.region = region
 
         self.web_results = []
         self.vertical_blocks = []
