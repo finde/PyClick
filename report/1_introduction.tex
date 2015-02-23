@@ -1,10 +1,12 @@
 \section{Introduction}
-% Introduction: introduce the topic of the project and describe the problem the project attempts to solve; be brief.
-In this report, we will ...
-The algorithms tested on include ..
-These algorithms will ..
-Our experiment was done using ...
-By doing this experiment we can know ...
+Modeling user behavior on a search engine result page is important for understanding the users and supporting simulation experiments.
+As result pages become more complex, click models evolve as well in order to capture additional aspects of user behavior in response to new forms of result presentation.
+In recent years many models have been proposed that are aimed at predicting clicks of web search users. 
+In this report, we will implement and evaluate different click models using evaluation metrics.
+These click models include dependent click model (DCM) \cite{Guo2009}, dynamic bayesian network click model (DBN) \cite{Chapelle2009}, user browsing model (UBM) \cite{Dupret2008}, and task-centric click model (TCM) \cite{Zhang2011}.
+The evaluation metrics include likelihood, perplexity, click through rate prediction, relevance prediction, computation time and ranking performance.
+Our experiment was done using Yandex click log \cite{yandex}.
+By doing this experiment we can know the performance of different click model and this information can be used as a benchmark of the next click model proposal.
 
 %report organization
 This report is organized as follows.

@@ -1,3 +1,4 @@
+%
 \documentclass{article} % For LaTeX2e
 \usepackage{nips13submit_e,times}
 \usepackage{hyperref}
@@ -10,7 +11,7 @@
 \usepackage{mathtools}
 \usepackage{pgfplots}
 \usetikzlibrary{bayesnet}
-
+\pgfplotsset{compat=1.10}
 
 %\documentstyle[nips13submit_09,times,art10]{article} % For LaTeX 2.09
 
@@ -42,9 +43,14 @@ Finde Xumara \\
 
 \nipsfinalcopy % Uncomment for camera-ready version
 
+\usepackage[english]{babel}
 \begin{document}
+
 \nocite{*}
 \maketitle
+
+%\begin{abstract}
+%\end{abstract}
 
 \input{1_introduction.tex}
 \input{2_methodology.tex}
