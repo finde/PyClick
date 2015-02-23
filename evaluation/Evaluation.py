@@ -117,7 +117,7 @@ class RankingPerformance(EvaluationMethod):
 
     def evaluate(self, model, sessions, **kwargs):
         counter = collections.Counter([session.query for session in sessions])
-        useful_sessions = [query_id for query_id in counter if counter[query_id] >= 5 and query_id in self.relevances]
+        useful_sessions = [query_id for query_id in counter if counter[query_id] >= 1 and query_id in self.relevances]
         
         total_ndcg = 0
 
@@ -139,16 +139,14 @@ class RankingPerformance(EvaluationMethod):
                 for result in session.web_results:
                     predicted[result.object] = pred_rels[i]
                     i += 1
-
-            ranking = sorted(predicted.values(),reverse = True)
-
-
-            #REGION HACK. Now does first region how to remove? Use query/region pairs for indexing of the queries?
+            
             rel = self.relevances[query_id]
-
+            ranking = sorted(predicted.values(),reverse = True)
+            #REGION HACK. Now does first region how to remove? Use query/region pairs for indexing of the queries?
             ideal_ranking = sorted(rel[rel.keys()[0]].values(),reverse = True)
-            dcg = self.dcg(ranking)
-            idcg = self.dcg(ideal_ranking)
+            
+            dcg = self.dcg(ranking[:5])
+            idcg = self.dcg(ideal_ranking[:5])
             ndcg = dcg / idcg
 
             total_ndcg += ndcg
@@ -156,11 +154,7 @@ class RankingPerformance(EvaluationMethod):
             
 
     def dcg(self, ranking):
-        dcg = ranking[0]
-        for i,doc in enumerate(ranking[1:5]):
-            dcg += ranking[i]/math.log(i+2,2)
-        return dcg
-
+        return sum([(2**r-1)/math.log(i+2,2) for i,r in enumerate(ranking)])
                 
         # for all queries occuring more than 10 times and have rankings in true_relevances 
         #   Retrieve all sessions for given query

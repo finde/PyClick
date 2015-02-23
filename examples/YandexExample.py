@@ -46,7 +46,7 @@ def main(sessions_file, relevance_file, n_sessions):
         #VCM
     ]
 
-    headers = ['Model', 'LL', 'Perp', 'Rel. Pred. MSE', 'Rel. Ranking', 'CTR Pred.', 'Comp. Time.']
+    headers = ['Model', 'LL', 'Perp', 'Rel.Pred.MSE', 'Ranking.NDCG', 'CTR Pred.', 'Comp. Time.']
     tableData = []
     true_relevances = parse_yandex_relevances(os.path.join(this_directory, relevance_file))  
     rel_pred = RelevancePrediction(true_relevances)
@@ -76,12 +76,12 @@ def main(sessions_file, relevance_file, n_sessions):
         print perplexity, 
         print " ".join(["%.4f" % v for v in perplexity_at_rank])
         
-        print "Relevance prediction"
+        print "Relevance prediction MSE"
         rel_score = rel_pred.evaluate(click_model, test)
         print rel_score
 
         print "Relevance Ranking"
-        rank_score = ranking.evaluate(click_model, train + test)
+        rank_score = ranking.evaluate(click_model, train+test)
         print rank_score
         
         print 'Click through rate prediction'
@@ -104,5 +104,5 @@ if __name__ == '__main__':
     if len(sys.argv) >= 4:
         sessions = sys.argv[3]
     else:
-        sessions = 1000
+        sessions = 100
     main(session_data, relevance_data, sessions)
