@@ -38,18 +38,21 @@ def main(sessions_file, relevance_file, n_sessions):
     classes = [
         UBM,
         TCM,
-        DCM,
-        DBN,
         SimpleDCM,
         SimpleDBN,
-        # FCM,
-        # VCM
+        DCM,
+        DBN,
+        #FCM,
+        #VCM
     ]
 
-    headers = ['Click Model', 'Log-likelihood', 'Perplexity', 'Computation Time']
+    headers = ['Model', 'LL', 'Perp', 'Rel. Pred. MSE', 'Rel. Ranking', 'CTR Pred.', 'Comp. Time.']
     tableData = []
     true_relevances = parse_yandex_relevances(os.path.join(this_directory, relevance_file))  
     rel_pred = RelevancePrediction(true_relevances)
+    ll = Loglikelihood()
+    perp = Perplexity()
+    ranking = RankingPerformance(true_relevances)
 
     for click_model_class in classes:
 
@@ -61,17 +64,33 @@ def main(sessions_file, relevance_file, n_sessions):
         training_time = (time.time() - start_time)
         print("--- %s seconds ---" % training_time)
 
-        print click_model
+        #print click_model
 
-        print "Log-likelihood and perplexity"
+        
+        print "Log-likelihood"  
+        log_likelihood = ll.evaluate(click_model, test)
+        print log_likelihood
+        
+        print "Perplexity"
+        perplexity, perplexity_at_rank = perp.evaluate(click_model, test)
+        print perplexity, 
+        print " ".join(["%.4f" % v for v in perplexity_at_rank])
+        
+        print "Relevance prediction"
+        rel_score = rel_pred.evaluate(click_model, test)
+        print rel_score
 
-        print "RELEVANCE_PREDICTION:",rel_pred.evaluate(click_model, test)
-            
-        log_likelihood, perplexity, perplexity_at_rank = click_model.test(test)
-        print log_likelihood, perplexity
+        print "Relevance Ranking"
+        rank_score = ranking.evaluate(click_model, train + test)
+        print rank_score
+        
+        print 'Click through rate prediction'
+        print 'Not yet implemented'
+        ctr_score = 0
+
         print ""
 
-        tableData.append([click_model_class.__name__, log_likelihood, perplexity, training_time])
+        tableData.append([click_model_class.__name__, log_likelihood, perplexity, rel_score, rank_score, ctr_score, training_time])
 
     _format = 'grid'
     print '\n\nSUMMARY\n=========='

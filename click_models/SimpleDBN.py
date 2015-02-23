@@ -95,6 +95,18 @@ class SimpleDBN(ClickModel):
         return {SimpleDBNAttract.NAME: 0.5,
                 SimpleDBNSatisfy.NAME: 0.5}
 
+    def get_relevances(self, sessions):
+        relevances = []
+        for session in sessions:
+            for rank, result in enumerate(session.web_results):
+                params = self.get_params(self.params, session, rank)
+                param_values = self.get_param_values(params)
+                attract = param_values[SimpleDBNAttract.NAME]
+                satisfy = param_values[SimpleDBNSatisfy.NAME]
+                relevances.append(attract*satisfy)
+                
+        return relevances
+
 
 class SimpleDBNRel(SimpleDBN):
     """

@@ -84,6 +84,7 @@ def parse_yandex_relevances(relevances_filename):
     with open(relevances_filename, "r") as f:
         for row in f:
             query_id, region_id, url, rel = row.split('\t')
+            rel = float(rel.strip())
             if query_id not in relevances:
                 relevances[query_id] = dict()
             query = relevances[query_id] 

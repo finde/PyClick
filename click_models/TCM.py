@@ -56,10 +56,8 @@ class TCM(ClickModel):
                 print >> sys.stderr, 'Iteration: %d, LL: %.10f' % (iteration_count + 1, self.get_loglikelihood(tasks))
 
 
-    def get_updated_params(self, sessions, priors):
+    def get_updated_params(self, tasks, priors):
         updated_params = priors
-
-        tasks = self._transform_sessions(sessions)
 
         for task in tasks:
             self.freshness = None
@@ -119,12 +117,12 @@ class TCM(ClickModel):
         return p_click
 
 
-    def get_log_click_probs(self, session, freshness):
+    def get_log_click_probs(self, session, **kwargs):
         """
             Returns the list of log-click probabilities for all URLs in the given session.
         """
         log_click_probs = []
-
+        freshness = kwargs["freshness"]
         for rank, click in enumerate(session.get_clicks()):
             params = self.get_params(self.params, session, rank)
             param_values = self.get_param_values(params)
@@ -162,7 +160,7 @@ class TCM(ClickModel):
         total_session = 0
 
         tasks = self._transform_sessions(sessions)
-
+    
         for task in tasks:
             freshness = self.get_previous_examination_chance(task)
             for s_idx, session in enumerate(task):
@@ -238,14 +236,36 @@ class TCM(ClickModel):
     
 
     def _transform_sessions(self, sessions):
+
+        try:
+            sessions[0][0]
+            return sessions
+        except TypeError as e:
+            pass
         task_dict = dict()
         for session in sessions:
             if session.id not in task_dict:
                 task_dict[session.id] = []
             task = task_dict[session.id]
             task.append(session)
-
         return task_dict.values()
+
+
+    def get_relevances(self, sessions):
+        tasks = self._transform_sessions(sessions)
+        
+        relevances = []
+
+        for task in tasks:
+            for s_idx, session in enumerate(task):
+                for rank, result in enumerate(session.web_results):
+                    params = self.get_params(self.params, session, rank)
+                    param_values = self.get_param_values(params)
+                    relevance = param_values[TCMRelevance.NAME]
+                    relevances.append(relevance)
+        return relevances
+
+
         
 
 class TCMParamHelper(object):
@@ -312,6 +332,10 @@ class TCMExamination(ClickModelParam):
             denom = 1 - alpha_1 * beta_j * f_ij * r_ij
             self.numerator += num / denom
         self.denominator += 1
+
+
+
+        
 
 
 class TCMIntent(ClickModelParam):
@@ -394,15 +418,14 @@ class TCMRelevanceWrapper(ClickModelParamWrapper):
         """
             Defines the way of initializing parameters.
         """
-        init = partial(init_param_func, **kwargs)
-        params = defaultdict(lambda: defaultdict(init))
-        return params
+        return defaultdict(lambda: defaultdict(lambda: init_param_func(**kwargs)))
 
     def get_param(self, session, rank, **kwargs):
         """
             Returns the value of the parameter for a given query and doc.
         """
-        return self.params[session.query][session.web_results[rank]]
+        
+        return self.params[session.query][session.web_results[rank].object]
 
     def get_params_from_JSON(self, json_str):
         pass

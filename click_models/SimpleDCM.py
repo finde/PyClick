@@ -99,6 +99,17 @@ class SimpleDCM(ClickModel):
         return {SimpleDCMRelevance.NAME: 0.5,
                 SimpleDCMLambda.NAME: 0.5}
 
+    def get_relevances(self, sessions):
+        relevances = []
+        for session in sessions:
+            for rank, result in enumerate(session.web_results):
+                params = self.get_params(self.params, session, rank)
+                param_values = self.get_param_values(params)
+                relevance = param_values[SimpleDCMRelevance.NAME]
+                relevances.append(relevance)
+        return relevances 
+        
+
 
 class SimpleDCMRel(SimpleDCM):
     """

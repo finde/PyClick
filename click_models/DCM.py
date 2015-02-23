@@ -87,6 +87,16 @@ class DCM(SimpleDCM):
 
         return nonrel_prob_full
 
+    def get_relevance(self, sessions):
+        relevances = []
+        for session in sessions:
+            for rank, result in enumerate(session.web_results):
+                params = self.get_params(self.params, session, rank)
+                param_values = self.get_param_values(params)
+                rel = param_values[DCMRelevance.NAME]
+                relevances.append(rel)
+        return relevances
+
 
 class DCMRel(DCM):
     """

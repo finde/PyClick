@@ -147,6 +147,18 @@ class DBN(ClickModel):
         prior_values[DBNGamma.NAME] = 0.5
         return prior_values
 
+    def get_relevances(self, sessions):
+        relevances = []
+        for session in sessions:
+            for rank, result in enumerate(session.web_results):
+                params = self.get_params(self.params, session, rank)
+
+                attract = params[SimpleDBNAttract.NAME].get_value()
+                satisfy = params[SimpleDBNSatisfy.NAME].get_value()
+                relevances.append(attract*satisfy)
+                
+        return relevances
+
 
 class DBNRel(DBN):
     def init_params(self, init_param_values):

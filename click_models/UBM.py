@@ -106,6 +106,17 @@ class UBM(ClickModel):
         return {UBMRelevance.NAME: 0.5,
                 UBMExamination.NAME: 0.5}
 
+    def get_relevances(self, sessions):
+        relevances = []
+        for session in sessions:
+            for rank, result in enumerate(session.web_results):
+                params = self.get_params(self.params, session, rank)
+                param_values = self.get_param_values(params)
+                relevance = param_values[UBMRelevance.NAME]
+                relevances.append(relevance)
+        return relevances
+
+    
 
 class UBMRel(UBM):
     """
