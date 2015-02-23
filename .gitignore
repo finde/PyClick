@@ -62,3 +62,12 @@ data/
 
 #Mac
 *.DS_Store
+main.aux
+main.bbl
+main.blg
+main.ddf
+main.dvi
+main.out
+main.synctex.gz
+main.tex.Backup-20150223-190946
+report.ddf
