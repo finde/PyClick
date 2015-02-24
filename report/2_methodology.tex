@@ -3,20 +3,10 @@
 We compare UBM, DCM, DBN and TCM on the Yandex dataset \cite{yandex}. In this section, we briefly describe their main characteristics and differences. We have implemented TCM ourselves, the other algorithms were taken from PyClick \cite{PyClick}.
 
 \subsection{DCM}
-The Dependent Click Model (DCM) was first proposed by Guo et al. in \cite{Guo2009}. In the paper they propose a new click model which can handle multiple clicks per query by introducing a position dependent parameter $lambda_j$ to reflect the chance that the user would like to see more results after a click at position $j$. A graphical representation of the model is presented in Figure\ref{fig:dcm_gm} 
-
-\begin{figure}[ht!]
-  \begin{center}
-  	\begin{tabular}{c}
-  		\input{graph/model_dcm}
-  	\end{tabular}
-  \end{center}
-  \caption{The graphical model of DCM.}	
-  \label{fig:dcm_gm}
-\end{figure}
+The dependent click model was first proposed by Guo et al. in \cite{Guo2009}. In the paper they propose a new click model which can handle multiple clicks per query by introducing a position dependent parameter $lambda_j$ to reflect the chance that the user would like to see more results after a click at position $j$. A graphical representation of the model is presented in Figure\ref{fig:dcm_gm} 
 
 \subsection{DBN}
-The Dynamic Bayesian Network is an extension to the traditional Cascade model proposed by Chapelle and Zhang in \cite{Zhang2011}. For a given position $j$, in addition to observed variable $C_j$ indicating whether there was a click or not at this position, the following latent variable are defined to model examination, perceived relevance and actual relevance, respectedly:
+The dynamic bayesian network is an extension to the traditional cascade model proposed by Chapelle and Zhang in \cite{Zhang2011}. For a given position $j$, in addition to observed variable $C_j$ indicating whether there was a click or not at this position, the following latent variable are defined to model examination, perceived relevance and actual relevance, respectedly:
 \begin{itemize}
 	\item $E_j$: did the user $examine$ the document?
 	\item $A_j$: was the user $attracted$ by the document?
@@ -25,30 +15,289 @@ The Dynamic Bayesian Network is an extension to the traditional Cascade model pr
 They introduce a variable $s_u$ for each document $u$ which describes the relevance of the document for this query. When the user clicks on this document, there is a certain chance that the user will be satisfied. If the user is not satisfied, he continues to examine the next document with a probability $\gamma$ and stops otherwise. The parameter $\gamma$ is known as the 'perseverance'. A graphical representation of the model is presented in Figure \ref{fig:dbn_gm}. 
 
 \begin{figure}[ht!]
-	\begin{center}
-		\begin{tabular}{c}
-			\input{graph/model_dbn}
-		\end{tabular}
-	\end{center}
-	\caption{The graphical model of DBN.}	
-	\label{fig:dbn_gm}
+	\begin{subfigure}[b]{.45\textwidth}
+		\centering
+		\input{graph/model_dcm}
+		\caption{DCM}	
+		\label{fig:dcm_gm}
+	\end{subfigure}
+	\begin{subfigure}[b]{.45\textwidth}
+		\centering
+		\input{graph/model_dbn}
+		\caption{DBN}
+		\label{fig:dbn_gm}
+	\end{subfigure}
+	\caption{The graphical model of DCM and DBN.}
 \end{figure}
 
 \subsection{UBM}
 In \cite{Dupret2008}, Dupret and Piwowarski propose a new click model called the User Browsing Model (UBM). The main difference between UBM and other models is that UBM takes the distance into account from the current document \(u_j\) to the last clicked document \(u_{j'}\) for determining the probability that the user continues browsing:
 \[P(E_j =1 \mid C_{j'}=1, C_{j'+1}=0, \dots, C_{j-1}=0) = \gamma_{jj'}\]
-The probability that a document at rank \(r\) is examined \(E_j\) therefore depends on all possible paths the user could have taken to arrive at this document:
-\[P(E_j = 1) = \sum_{i=1}^{j-1} \gamma_{ji}\]
+The probability that a document at rank \(j\) is examined \(E_j\) therefore depends on all possible paths the user could have taken to arrive at this document:
+\[P(E_j = 1) = \sum_{j'=1}^{j-1} \gamma_{jj'}\]
 A graphical representation of the model is presented in Figure~\ref{fig:ubm_gm}.
 
-\subsection{TCM}
-% TCM
-\begin{figure}[ht]
-  \begin{center}
-    \begin{tabular}{c}
-      \input{graph/model_tcm}
-    \end{tabular}
-  \end{center}
-  \caption{The graphical model of TCM.}
-  \label{fig:tcm_gm}
+\begin{figure}[ht!]
+	\begin{center}
+		\begin{tabular}{c}
+			\input{graph/model_ubm}
+		\end{tabular}
+	\end{center}
+	\caption{The graphical model of UBM.}	
+	\label{fig:ubm_gm}
 \end{figure}
+
+\subsection{TCM}
+The Task-centric Click Model (TCM) was first proposed by Zhang et al. in \cite{Zhang2011}. In the paper they propose a new click model which can handle multiple clicks of multiple queries in a task by introducing two new biases. The first bias indicates that users tend to express their information needs incrementally in a task, thus perform more clicks as their needs become clearer. The other bias indicates that users tend to click fresh documents that are not included in the results of previous queries. In their paper, they named the first assumption as \texttt{query bias}, and the second assumption as \texttt{duplicate bias}. A graphical representation of the state-of-the-art of the model is presented in Figure\ref{fig:dcm_gm} and the notations used in TCM are described in Table\ref{table:tcm_notations}. 
+
+\begin{table}[ht]
+	\centering
+	\begin{tabular}{l|lll|}
+		\hline
+		Symbol & Description \\
+		\hline
+		(\(i\),\(j\)) 	& \(j\)-th ranking position in \(i\)-th query session.\\
+		$M_i$			& Whether the \(i\)-th query matches the user's intent.\\
+		$N_i$ 			& Whether the the user submits another query after \(i\)-th query session.\\		
+		$E_{i,j}$ 		& Examination of the document at (\(i\),\(j\)).\\
+		$H_{i,j}$ 		& Previous Examination of the document at (\(i\),\(j\)).\\
+		$F_{i,j}$ 		& Freshness of the document at (\(i\),\(j\)).\\
+		$R_{i,j}$ 		& Relevance of the document at (\(i\),\(j\)).\\
+		$C_{i,j}$ 		& Whether the the document at (\(i\),\(j\)) is clicked.\\
+		(\(i'\),\(j'\)) & Assume that \(d\) is the document at (\(i\),\(j\)).\\
+		&\(i'\) is the latest query session where \(d\) has appeared in previous query sessions,\\ &and \(j'\) is the ranking position of this appearance.\\
+		\hline
+	\end{tabular}
+	\caption{Notations used in TCM}
+	\label{table:tcm_notations}
+\end{table}
+
+\begin{figure}[ht!]
+	\begin{center}
+		\begin{tabular}{c}
+			\input{graph/model_tcm}
+		\end{tabular}
+	\end{center}
+	\caption{The graphical model of state-of-the-art TCM.}
+	\label{fig:tcm_gm}
+\end{figure}
+
+This model can be formalized with the following conditional probabilities:
+\begin{align}
+	P(M_i=1) &= \alpha_1 \\
+	\label{eq:alpha_2}
+	P(N_i|M_i=1) &= \alpha_2 \\
+	P(F_{i,j}=1|M_{i,j}=1) &= \alpha_3 \\
+	P(E_{i,j}=1) &= \beta_j \\
+	P(R_{i,j}=1) &= r_d \\
+	M_i = 0 &\Rightarrow N_i = 1\\
+	H_{i,j} = 0 &\Rightarrow F_{i,j} = 1\\
+	H_{i,j} = 0 &\Leftrightarrow H_{i',j'} = 0, E_{i',j'} = 0\\
+	C_{i,j} = 1 &\Leftrightarrow M_i = 1, E_{i,j} = 1, R_{i,j} = 1, F_{i,j} = 1
+\end{align}
+
+
+In our implementation, we simplified TCM model by assuming that $M_i$ is observed from the click log data, thus eq.\ref{eq:alpha_2} can be removed.
+Our second assumptions is that $M_i, E_{i,j},R_{i,j}$ and $F_{i,j}$ are independent.
+The graphical model of our TCM implementation is presented in Fig \ref{fig:tcm_gm_new}.
+\begin{figure}[ht!]
+	\begin{center}
+		\begin{tabular}{c}
+			\input{graph/model_tcm_new}
+		\end{tabular}
+	\end{center}
+	\caption{The graphical model of simplified TCM.}
+	\label{fig:tcm_gm_new}
+\end{figure}
+
+The simplified TCM can be formularized with the following conditional probabilities.
+
+\subsubsection{Click probability}
+For $P(F_{i,j}=1)$ we introduce a variable $f_{i,j}$, which will be derived later. \\
+By assumption that $M_i, E_{i,j},R_{i,j}$and$F_{i,j}$ are independent, click probability can be formularize as:
+\begin{align}
+	P(C_{i,j} = 1)
+	&= P(M_i=1) * P(E_{i,j}=1) * P(R_{i,j}=1) * P(F_{i,j} = 1) \\
+	&= \alpha_1 * \beta_j * r_{i,j} * f_{i,j}
+	\label{eq:proba_click}
+\end{align}
+
+\subsubsection{Probability of the query match user intention}
+Because we remove equation that depends on $\alpha_2$, we can now set $\alpha_1$ as MLE.
+\begin{align*}
+	P(M_i = 1) 
+	&= \alpha_1 \\
+\end{align*}
+
+\subsubsection{Probability of user submit next query}
+User submit next query if the query does not match user intention ($\alpha_1$) or user want to search more.
+\begin{align*}
+	P(N_i=1) 
+	&= \frac{1}{|S|} \sum_{i\in S} \mathcal{I}(N_i=1) \\
+	&= \frac{q_i}{|S|} \\
+	&= n_i
+\end{align*}
+
+$q_i$ is the number of submitted-queries where user submit another query after $i$-th query session.
+
+\begin{align*}
+	P(N_i=1|M_i=1) 
+	&= \alpha_2 \\
+	&= \frac{P(N_i=1) - P(N_i=1|M_i=0)P(M_i=0)}{P(M_i=1)} \\
+	&= \frac{n_i + \alpha_1 - 1}{\alpha_1}
+\end{align*}
+
+\subsubsection{Relevance probability}
+\begin{align*}
+	P(R_{i,j} = 1)
+	&= r_{i,j} \\
+	&= \frac{\sum_{q_{i,j} \in S_{i,j}} P(R_{i,j}=1 | C)}{|S_{i,j}|}
+\end{align*}
+
+Where $S_{i,j}$ are all sessions (queries) containing the document corresponding with the query $i$ at rank $j$ - document
+$P(R_{i,j}=1 | C)$ will be derive on eq.\ref{eq:proba_relevant_given_click}
+
+\begin{align}
+	P(R_{i,j}=1 | C)
+	&= \mathcal{I}(C_{i,j} = 1) P(R_{i,j}|C_{i,j}=1) + \mathcal{I}(C_{i,j} = 0) P(R_{i,j}|C_{i,j}=0) \\
+	&= c_{i,j} + (1-c_{i,j}) \frac {P(C_{i,j}=0|R_{i,j}=1) P(R_{i,j} = 1)} {P(C_{i,j} = 0)} \\
+	&= c_{i,j} + (1-c_{i,j}) \frac {P(C_{i,j}=0|R_{i,j}=1) r_{i,j}} { 1 - P(C_{i,j} = 1)}
+	\label{eq:proba_relevant_given_click}
+\end{align}
+Where $c_{i,j} = 1$ if (i,j) was clicked in the current session.
+$P(C_{i,j}=0|R_{i,j}=1)$ is the chance of no click given that it is relevant. 
+
+\begin{align*}
+P(C_{i,j}=0|R_{i,j}=1) 
+	&= P(C_{i,j }=0|R_{i,j}=1, M_i = 1) P(M_i=1) + P(C_{i,j }=0|R_{i,j}=1, M_i = 0)P(M_i=0) \\
+	&= \alpha_1 P(C_{i,j }=0|R_{i,j}=1, M_i = 1, E_{i,j}=1) P(E_{i,j}=1)\\     &+ \alpha_1 P(C_{i,j }=0|R_{i,j}=1, M_i = 1, E_{i,j}=0) P(E_{i,j}=0)\\
+	&+ (1-\alpha_1) P(C_{i,j }=0|R_{i,j}=1 , M_i = 0, E_{i,j}=1) P(E_{i,j}=1)\\
+	&+ (1-\alpha_1) P(C_{i,j }=0|R_{i,j}=1 , M_i = 0, E_{i,j}=0) P(E_{i,j}=0) \\
+	\\
+	&= \alpha_1 \beta_j P(C_{i,j }=0|R_{i,j}=1, M_i = 1, E_{i,j}=1, F_{i,j}=1) P(F_{i,j}=1)\\
+	&+ \alpha_1 \beta_j P(C_{i,j }=0|R_{i,j}=1, M_i = 1, E_{i,j}=1, F_{i,j}=0) P(F_{i,j}=0)\\
+	&+ \alpha_1 (1-\beta_j) P(C_{i,j }=0|R_{i,j}=1 , M_i = 1, E_{i,j}=0, F_{i,j}=1) P(F_{i,j}=1)\\
+	&+ \alpha_1 (1-\beta_j) P(C_{i,j }=0|R_{i,j}=1 , M_i = 1, E_{i,j}=0, F_{i,j}=0) P(F_{i,j}=0)\\
+	&+ (1-\alpha_1) \beta_j P(C_{i,j }=0|R_{i,j}=1, M_i = 0, E_{i,j}=1, F_{i,j}=1) P(F_{i,j}=1)\\
+	&+ (1-\alpha_1) \beta_j P(C_{i,j }=0|R_{i,j}=1, M_i = 0, E_{i,j}=1, F_{i,j}=0) P(F_{i,j}=0)\\
+	&+ (1-\alpha_1) (1-\beta_j) P(C_{i,j }=0|R_{i,j}=1 , M_i = 0, E_{i,j}=0, F_{i,j}=1) P(F_{i,j}=1)\\
+	&+ (1-\alpha_1) (1-\beta_j) P(C_{i,j }=0|R_{i,j}=1 , M_i = 0, E_{i,j}=0, F_{i,j}=0) P(F_{i,j}=0)\\
+\end{align*}
+We note that $P(C_{i,j }=0|R_{i,j}=1, M_i = 1, E_{i,j}=1, F_{i,j}=1) = 0$. Otherwise it is $1$. From eq. 24 from TCM paper. Together with inserting our parameters this gives us the following:
+
+\begin{align}
+	P(C_{i,j}=0|R_{i,j}=1) &= 
+	\alpha_1 \beta_j f_{i,j} +
+	\alpha_1 \beta_j (1-f_{i,j}) + 
+	\alpha_1 (1-\beta_j) f_{i,j} +
+	\alpha_1 (1-\beta_j) (1-f_{i,j}) \\
+	&+ (1-\alpha_1) \beta_j f_{i,j} +
+	(1-\alpha_1) \beta_j (1-f_{i,j}) +
+	(1-\alpha_1) (1-\beta_j) (f_{i,j} \\
+	&+(1-\alpha_1) (1-\beta_j) (1-f_{i,j})
+\end{align}
+
+expanding this we are only left with
+\begin{align}
+	P(C_{i,j}=0|R_{i,j}=1) = 1 - (\alpha_1 \beta_j f_{i,j})
+	\label{eq:chance_no_click_given_relevant}
+\end{align}
+Which seems intuitive as we assumed that all $M_i, R_{i,j}, E_{i,j}$ and $F_{i,j}$ are independent to get $P(C_{i,j} = 1)$ . With this information we can calculate 
+\begin{align}
+	P(R_{i,j}=1 | C) &= c_{i,j} + (1-c_{i,j}) \frac { (1 - (\alpha_1 \beta_j f_{i,j}))  r_{i,j}} { 1 - \alpha_1 \beta_j f_{i,j} r_{i,j} } \\
+	&= c_{i,j} + (1-c_{i,j}) \frac{r_{i,j} - \alpha_1 \beta_j f_{i,j} r_{i,j} }{ 1 - \alpha_1 \beta_j f_{i,j} r_{i,j}}
+\end{align}
+
+\subsubsection{Examination probability}
+\begin{align}
+	P(E_{i,j} = 1) 
+	&= \beta_j \\
+	&= \frac{1}{|S|} \sum_{i \in S} P(E_{i,j}=1 | C)
+\end{align}
+Where $S$ is all sessions and $i$ is a query within that session.
+$P(E_{i,j}=1 | C)$ will be derive on eq.\ref{eq:proba_examined_given_click}
+
+\begin{align}
+	\label{eq:proba_examined_given_click}
+	P(E_{i,j}=1 | C)
+	&= \mathcal{I}(C_{i,j} = 1) P(E_{i,j}|C_{i,j}=1) + \mathcal{I}(C_{i,j} = 0) P(E_{i,j}|C_{i,j}=0) \\
+	&= c_{i,j} + (1-c_{i,j}) \frac {P(C_{i,j}=0|E_{i,j}=1) P(E_{i,j} = 1)} {P(C_{i,j} = 0)} \\
+	&= c_{i,j} + (1-c_{i,j}) \frac {P(C_{i,j}=0|E_{i,j}=1) \beta_j} { 1 - P(C_{i,j} = 1)}
+\end{align}
+Where $c_{i,j}$ indicates whether document $i,j$ was clicked.
+Analog to eq \ref{eq:chance_no_click_given_relevant} we can show that
+\begin{align}
+	P(C_{i,j}=0|E_{i,j}=1) = 1 - (\alpha_1 f_{i,j} r_{i,j})
+\end{align}
+
+This gives us 
+\begin{align}
+	P(E_{i,j}=1 | C) 
+	&= c_{i,j} + (1-c_{i,j}) \frac {( 1 - (\alpha_1 f_{i,j} r_{i,j}) )\beta_j} { 1 - \alpha_1 \beta_j f_{i,j} r_{i,j}} \\
+	& = c_{i,j} + (1-c_{i,j}) \frac {\beta_j - \alpha_1 \beta_j f_{i,j} r_{i,j}} { 1 - \alpha_1 \beta_j f_{i,j} r_{i,j}}
+\end{align}
+
+\subsubsection{Freshness probability}
+\begin{align}
+	P(F_{i,j} = 1 | H_{i,j} = 1) &= \alpha_3 \\
+	\alpha_3 &= \frac{1}{|S_{i,j}|} \sum_{q \in S} \sum_{(i,j) \in q} P(F{i,j}=1 | H_{i,j}=1, C)
+	\label{eq:freshness}
+\end{align}
+
+Where (i,j) is a query, rank pair identifying a certain document.
+$P(F_{i,j}=1 | C)$ will be derive on eq.\ref{eq:proba_freshness_given_click} \\
+$P(F_{i,j}=1)$ will be derive on eq.\ref{eq:proba_freshness}
+
+\begin{align}
+	\label{eq:proba_freshness_given_click}
+	P(F_{i,j}=1 | H_{i,j}=1, C)
+	&= \mathcal{I}(C_{i,j} = 1) P(F_{i,j}=1|H_{i,j}=1,C_{i,j}=1) \\
+	&+ \mathcal{I}(C_{i,j} = 0) P(F_{i,j}=1|H_{i,j}=1,C_{i,j}=0) \\
+	&= c_{i,j} + (1-c_{i,j}) \frac {P(C_{i,j}=0|F_{i,j}=1,H_{i,j}=1) P(F_{i,j} = 1 | H_{i,j}=1)} {P(C_{i,j} = 0 | H_{i,j} = 1)}
+\end{align}
+
+Analog to eq \ref{eq:chance_no_click_given_relevant} we can show that
+\begin{align}
+	P(C_{i,j}=0|F_{i,j}=1, H_{i,j}=1) &= 1 - (\alpha_1 \beta_j r_{i,j})
+	\label{eq:no_click_freshness}
+\end{align}
+We can also show
+\begin{align}
+	P(C_{i,j}=0|H_{i,j}=1) 
+	&= 1 - P(C_{i,j}=1|H_{i,j}=1) \\
+	&= 1-(\alpha_1 \alpha_3 \beta_j r_{i,j})
+\end{align}
+The only difference between this and eq.  \ref{eq:proba_click} is that it is given that $H_{i,j}=1$ and because $H_{i,j} = 1$ only has an influence on $P(F_{i,j}=1)$, namely that $P(F_{i,j}=1 | H_{i,j} = 1) = 1$, we can substitute $f_{i,j}$ with $\alpha3$ in eq. \ref{eq:proba_click}\\
+\\
+Now we only need to calculate $f_{i,j} = P(F_{i,j}) = 1$
+\begin{align}
+	\label{eq:proba_freshness}
+	P(F_{i,j} = 1)
+	&= \mathcal{I}(H_{i,j}=1) P(F_{i,j}=1|H_{i,j}=1) + \mathcal{I}(H_{i,j}=0) P(F_{i,j}=1|H_{i,j}=0) \\
+	&= \mathcal{I}(H_{i,j}=1) \alpha_3 + \mathcal{I}(H_{i,j}=0)
+\end{align}
+Where $\mathcal{I}(H_{i,j}=1)$ is a binary indicator function from the data specifying whether document $(i,j)$ was shown before in the current ($q$ from eq. \ref{eq:freshness}) session.\\
+
+We could replace this indicator function with the probability that the document was examined the last time it was shown. This probability, called $H_{i,j}$ would depend on the probability that it was examined and $H_{i',j'}$ where $i',j'$ is the last time this document was shown in the current session. It would look like this
+
+\begin{align}
+	P(H_{i,j} = 1) 
+	&= P(E_{i',j'} = 1) P(H_{i',j'} = 1)
+\end{align}
+
+then eq. \ref{eq:proba_freshness} becomes: 
+\begin{align}
+	P(F_{i,j} = 1) 
+	&= P(H_{i,j}=1) \alpha_3 + P(H_{i,j}=0) \\
+	&= P(H_{i,j}=1) \alpha_3 + (1 - P(H_{i,j}=1)) \\
+	&= \alpha_3 P(E_{i',j'} = 1) P(H_{i',j'} = 1) + (1 -  P(E_{i',j'} = 1) P(H_{i',j'} = 1))
+\end{align}
+Note that this discards the information that if $(i',j')$ was clicked it surely was examined. 
+
+With eq \ref{eq:no_click_freshness} we can calculate $P(F_{i,j}=1 | C)$
+\begin{align}
+	P(F_{i,j}=1 | H=1, C) 
+	&= c_{i,j} + (1-c_{i,j}) \frac {(1 - (\alpha_1 \beta_j r_{i,j})) \alpha_3} { 1 - \alpha_1 \alpha_3 \beta_j r_{i,j}} \\
+	&= c_{i,j} + (1-c_{i,j}) \frac {\alpha_3 - \alpha_1 \alpha_3 \beta_j r_{i,j}}{ 1 - \alpha_1 \alpha_3 \beta_j r_{i,j}}
+\end{align}
+
