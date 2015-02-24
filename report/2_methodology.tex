@@ -3,20 +3,10 @@
 We compare UBM, DCM, DBN and TCM on the Yandex dataset \cite{yandex}. In this section, we briefly describe their main characteristics and differences. We have implemented TCM ourselves, the other algorithms were taken from PyClick \cite{PyClick}.
 
 \subsection{DCM}
-The Dependent Click Model (DCM) was first proposed by Guo et al. in \cite{Guo2009}. In the paper they propose a new click model which can handle multiple clicks per query by introducing a position dependent parameter $lambda_j$ to reflect the chance that the user would like to see more results after a click at position $j$. A graphical representation of the model is presented in Figure\ref{fig:dcm_gm} 
-
-\begin{figure}[ht!]
-  \begin{center}
-  	\begin{tabular}{c}
-  		\input{graph/model_dcm}
-  	\end{tabular}
-  \end{center}
-  \caption{The graphical model of DCM.}	
-  \label{fig:dcm_gm}
-\end{figure}
+The dependent click model was first proposed by Guo et al. in \cite{Guo2009}. In the paper they propose a new click model which can handle multiple clicks per query by introducing a position dependent parameter $lambda_j$ to reflect the chance that the user would like to see more results after a click at position $j$. A graphical representation of the model is presented in Figure\ref{fig:dcm_gm} 
 
 \subsection{DBN}
-The Dynamic Bayesian Network is an extension to the traditional Cascade model proposed by Chapelle and Zhang in \cite{Zhang2011}. For a given position $j$, in addition to observed variable $C_j$ indicating whether there was a click or not at this position, the following latent variable are defined to model examination, perceived relevance and actual relevance, respectedly:
+The dynamic bayesian network is an extension to the traditional cascade model proposed by Chapelle and Zhang in \cite{Zhang2011}. For a given position $j$, in addition to observed variable $C_j$ indicating whether there was a click or not at this position, the following latent variable are defined to model examination, perceived relevance and actual relevance, respectedly:
 \begin{itemize}
 	\item $E_j$: did the user $examine$ the document?
 	\item $A_j$: was the user $attracted$ by the document?
@@ -24,31 +14,213 @@ The Dynamic Bayesian Network is an extension to the traditional Cascade model pr
 \end{itemize}
 They introduce a variable $s_u$ for each document $u$ which describes the relevance of the document for this query. When the user clicks on this document, there is a certain chance that the user will be satisfied. If the user is not satisfied, he continues to examine the next document with a probability $\gamma$ and stops otherwise. The parameter $\gamma$ is known as the 'perseverance'. A graphical representation of the model is presented in Figure \ref{fig:dbn_gm}. 
 
-\begin{figure}[ht!]
-	\begin{center}
-		\begin{tabular}{c}
-			\input{graph/model_dbn}
-		\end{tabular}
-	\end{center}
-	\caption{The graphical model of DBN.}	
-	\label{fig:dbn_gm}
+\begin{figure}[ht]
+	\begin{subfigure}[b]{.45\textwidth}
+		\centering
+		\begin{tikzpicture}
+		
+		% Define nodes
+		\node[obs, minimum size=1cm]                      				(c) {$C_j$};
+		\node[latent, left=.6cm of c, yshift=-.8cm, minimum size=1cm]  	(a) {$A_j$};
+		\node[latent, right=.6cm of c, yshift=-.8cm, minimum size=1cm]  (s) {$S_j$};
+		
+		\node[latent, above=.6cm of c, minimum size=1cm]  				(e) {$E_j$};
+		\node[latent, left=.6cm of e, minimum size=1cm]  				(e_m_1) {$E_{j-1}$};
+		\node[latent, right=.6cm of e, minimum size=1cm]  				(e_p_1) {$E_{j+1}$};
+		
+		% Connect the nodes
+		\edge {a,e} {c} ; %
+		\edge {c} {s} ; %
+		\edge {e_m_1} {e} ; %
+		\edge {e, s} {e_p_1} ; %
+		
+		% Plates
+		\plate [inner sep=.3cm, text centered] {u_r} {(a)(c)(e)(s)(e_m_1)(e_p_1)} {document $u_j$};
+		
+		\end{tikzpicture}
+		\caption{DCM}	
+		\label{fig:dcm_gm}
+	\end{subfigure}
+	\begin{subfigure}[b]{.45\textwidth}
+		\centering
+		\begin{tikzpicture}
+		
+		% Define nodes
+		\node[obs, minimum size=1cm]                      				(c) {$C_j$};
+		\node[latent, left=.6cm of c, yshift=-.8cm, minimum size=1cm]  	(a) {$A_j$};
+		\node[latent, right=.6cm of c, yshift=-.8cm, minimum size=1cm]  (s) {$S_j$};
+		
+		\node[latent, above=.6cm of c, minimum size=1cm]  				(e) {$E_j$};
+		\node[latent, left=.6cm of e, minimum size=1cm]  				(e_m_1) {$E_{j-1}$};
+		\node[latent, right=.6cm of e, minimum size=1cm]  				(e_p_1) {$E_{j+1}$};
+		
+		\node[const, left=1cm of a]  									(a_u) {$\alpha_u$};
+		\node[const, right=1cm of s] 									(s_u) {$s_u$};
+		
+		% Connect the nodes
+		\edge {a,e} {c} ; %
+		\edge {c} {s} ; %
+		\edge {e_m_1} {e} ; %
+		\edge {e} {e_p_1} ; %
+		\edge {s} {e_p_1} ; %
+		\edge {a_u} {a} ; %
+		\edge {s_u} {s} ; %
+		
+		% Plates
+		\plate [inner sep=.3cm, text centered] {u_r} {(a)(c)(e)(s)(e_m_1)(e_p_1)} {document $u_j$};
+		
+		\end{tikzpicture}
+		\caption{DBN}
+		\label{fig:dbn_gm}
+	\end{subfigure}
+	\caption{The graphical model of DCM and DBN.}
 \end{figure}
 
 \subsection{UBM}
 In \cite{Dupret2008}, Dupret and Piwowarski propose a new click model called the User Browsing Model (UBM). The main difference between UBM and other models is that UBM takes the distance into account from the current document \(u_j\) to the last clicked document \(u_{j'}\) for determining the probability that the user continues browsing:
 \[P(E_j =1 \mid C_{j'}=1, C_{j'+1}=0, \dots, C_{j-1}=0) = \gamma_{jj'}\]
-The probability that a document at rank \(r\) is examined \(E_j\) therefore depends on all possible paths the user could have taken to arrive at this document:
-\[P(E_j = 1) = \sum_{i=1}^{j-1} \gamma_{ji}\]
+The probability that a document at rank \(j\) is examined \(E_j\) therefore depends on all possible paths the user could have taken to arrive at this document:
+\[P(E_j = 1) = \sum_{j'=1}^{j-1} \gamma_{jj'}\]
 A graphical representation of the model is presented in Figure~\ref{fig:ubm_gm}.
 
-\subsection{TCM}
-% TCM
-\begin{figure}[ht]
-  \begin{center}
-    \begin{tabular}{c}
-      \input{graph/model_tcm}
-    \end{tabular}
-  \end{center}
-  \caption{The graphical model of TCM.}
-  \label{fig:tcm_gm}
+\begin{figure}[ht!]
+	\begin{center}
+		\begin{tabular}{c}
+			\begin{tikzpicture}
+			
+			% Define nodes
+			\node[obs, minimum size=1cm]                      				(c) {$C_j$};
+			\node[latent, left=.6cm of c, yshift=.8cm, minimum size=1cm]  	(a) {$A_j$};
+			
+			\node[latent, left=.6cm of c, yshift=-.8cm, minimum size=1cm]  	(e) {$E_j$};	
+			\node[const, above=.8cm of a]  									(a_u) {$\alpha_u$};
+			
+			\node[const, left=1cm of e, minimum size=1cm]  	(e_p) {$\gamma_{jj'}$};	
+			
+			% Connect the nodes
+			\edge {a,e} {c} ; %
+			\edge {e_p} {e} ; %
+			\edge {a_u} {a} ; %
+			
+			% Plates
+			\plate [inner sep=.5cm, text centered] {u_j} {(a)(e)(c)} {document $u_j$};
+			
+			\end{tikzpicture}
+		\end{tabular}
+	\end{center}
+	\caption{The graphical model of UBM.}	
+	\label{fig:ubm_gm}
 \end{figure}
+
+\subsection{TCM}
+\label{sec:methodology_tcm}
+The Task-centric Click Model (TCM) was first proposed by Zhang et al. in \cite{Zhang2011}. In the paper they propose a new click model which can handle multiple clicks of multiple queries in a task by introducing two new biases. The first bias indicates that users tend to express their information needs incrementally in a task, thus perform more clicks as their needs become clearer. The other bias indicates that users tend to click fresh documents that are not included in the results of previous queries. In their paper, they named the first assumption as \texttt{query bias}, and the second assumption as \texttt{duplicate bias}. A graphical representation of the state-of-the-art of the model is presented in Figure\ref{fig:dcm_gm} and the notations used in TCM are described in Table\ref{table:tcm_notations}. 
+
+\begin{table}[ht]
+	\centering
+	\begin{tabular}{l|lll|}
+		\hline
+		Symbol & Description \\
+		\hline
+		(\(i\),\(j\)) 	& \(j\)-th ranking position in \(i\)-th query session.\\
+		$M_i$			& Whether the \(i\)-th query matches the user's intent.\\
+		$N_i$ 			& Whether the the user submits another query after \(i\)-th query session.\\		
+		$E_{i,j}$ 		& Examination of the document at (\(i\),\(j\)).\\
+		$H_{i,j}$ 		& Previous Examination of the document at (\(i\),\(j\)).\\
+		$F_{i,j}$ 		& Freshness of the document at (\(i\),\(j\)).\\
+		$R_{i,j}$ 		& Relevance of the document at (\(i\),\(j\)).\\
+		$C_{i,j}$ 		& Whether the the document at (\(i\),\(j\)) is clicked.\\
+		(\(i'\),\(j'\)) & Assume that \(d\) is the document at (\(i\),\(j\)).\\
+		&\(i'\) is the latest query session where \(d\) has appeared in previous query sessions,\\ &and \(j'\) is the ranking position of this appearance.\\
+		\hline
+	\end{tabular}
+	\caption{Notations used in TCM}
+	\label{table:tcm_notations}
+\end{table}
+
+This model can be formalized with the following conditional probabilities:
+\begin{align}
+	P(M_i=1) &= \alpha_1 \\
+	\label{eq:alpha_2}
+	P(N_i|M_i=1) &= \alpha_2 \\
+	P(F_{i,j}=1|M_{i,j}=1) &= \alpha_3 \\
+	P(E_{i,j}=1) &= \beta_j \\
+	P(R_{i,j}=1) &= r_d \\
+	M_i = 0 &\Rightarrow N_i = 1\\
+	H_{i,j} = 0 &\Rightarrow F_{i,j} = 1\\
+	H_{i,j} = 0 &\Leftrightarrow H_{i',j'} = 0, E_{i',j'} = 0\\
+	C_{i,j} = 1 &\Leftrightarrow M_i = 1, E_{i,j} = 1, R_{i,j} = 1, F_{i,j} = 1
+\end{align}
+
+In our implementation, we simplified TCM model by assuming that $M_i$ is observed from the click log data, thus eq.\ref{eq:alpha_2} can be removed.
+Our second assumptions is that $M_i, E_{i,j},R_{i,j}$ and $F_{i,j}$ are independent.
+The detail calculation for updating EM parameters of the simplified TCM can be found in the appendices section.
+The graphical model of our TCM implementation is presented in Fig \ref{fig:tcm_gm_new}.
+
+\begin{figure}[ht]
+	\begin{subfigure}[b]{.45\textwidth}
+		\centering
+		\begin{tikzpicture}
+		
+		% Define nodes
+		\node[obs]                      (n) {$N_i$};
+		\node[latent, left=1.2cm of n]  (m) {$M_i$};
+		\node[obs, below=0.6cm of n]    (c) {$C_i$};
+		\node[latent, left=1.2cm of c]  (e) {$E_{i,j}$};
+		\node[latent, right=1.2cm of c] (r) {$R_{i,j}$};
+		\node[latent, below=0.6cm of c] (f) {$F_{i,j}$};
+		\node[latent, left=1.2cm of f]  (h) {$H_{i,j}$};
+		\node[latent, left=1.2cm of h]  (h_prime) {$H_{i,j}'$};
+		\node[latent, left=1.2cm of h, yshift=1.2cm]  (e_prime) {$E_{i,j}'$};
+		
+		% Connect the nodes
+		\edge {m} {n,c} ; %
+		\edge {e,r,f} {c} ; %
+		\edge {h} {c} ; %
+		\edge {h_prime,e_prime} {h} ; %
+		
+		% Plates
+		\plate [inner sep=.3cm] {p_n} {(e)(c)(r)(f)(h)} {$j=1,\dots,n$} ;
+		\plate [inner sep=.3cm] {p_m} {(m)(n)(p_n)} {$i=1,\dots,m$} ;
+		
+		\end{tikzpicture}
+		\caption{state-of-the-art TCM.}
+		\label{fig:tcm_gm}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{.45\textwidth}
+		\centering
+		\begin{tikzpicture}
+	
+		% Define nodes
+		\node[obs]					  (c) {$C_i$};
+		\node[obs, left=1.2cm of n, yshift=1.4cm]  (m) {$M_i$};
+		\node[latent, left=1.2cm of c]  (e) {$E_{i,j}$};
+		\node[latent, right=1.2cm of c] (r) {$R_{i,j}$};
+		\node[latent, below=0.6cm of c] (f) {$F_{i,j}$};
+		\node[latent, left=1.2cm of f]  (h) {$H_{i,j}$};
+		\node[latent, left=1.2cm of h]  (h_prime) {$H_{i,j}'$};
+		\node[latent, left=1.2cm of h, yshift=1.2cm]  (e_prime) {$E_{i,j}'$};
+		
+		% Connect the nodes
+		\edge {m} {n,c} ; %
+		\edge {e,r,f} {c} ; %
+		\edge {h} {c} ; %
+		\edge {h_prime,e_prime} {h} ; %
+		
+		% Plates
+		\plate [inner sep=.3cm] {p_n} {(e)(c)(r)(f)(h)} {$j=1,\dots,n$} ;
+		\plate [inner sep=.3cm] {p_m} {(m)(n)(p_n)} {$i=1,\dots,m$} ;
+		
+		\end{tikzpicture}
+		
+		\caption{simplified TCM}
+		\label{fig:tcm_gm_new}
+	\end{subfigure}
+	
+	
+	\caption{The graphical model of state-of-the-art TCM and simplified TCM.}
+	\label{fig:tcm_gm_new}
+\end{figure}
+
+\fixme{TODO:: add more click model}
