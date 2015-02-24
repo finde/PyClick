@@ -8,26 +8,42 @@
 
 % purpose of evaluation
 \subsection{Evaluation Criteria}
-In order to compare performances of our systems we used the ...
+The equally evaluate each click models performance, we used evaluation metrics that was proposed along with the click model. The evaluation metrics used in this experiment is listed as follow:
 
-% data used in the evaluation
-\subsection{Dataset}
+\subsubsection{Likelihood and Perplexity}
+Likelihood is already implied in each click model during E-step, where it should get better for every EM iteration. 
+However, this evaluation can became interesting when we compare one click-model to the others. 
+By comparing the likelihood evaluation per iteration, we can see the performance of each click-model based on its convergent speed. 
 
-The dataset used are ...
+Click perplexity is a widely used metric for evaluation click model accuracy. 
+Perplexity can be seen as the log-likelihood powers which are computed independently at each position as also mentioned at \cite{Zhang2011} and \cite{Dupret2008}. 
+For example, we assume that $q_j^s$ is the probability of some click calculated from a click model, i.e. $P(C_j^s=1)$ where $C_j^s$ is a binary value indicating the click event at position $j$ in query session $s$. Then the click perplexity at position $j$ is computed as follows:
+\begin{align*}
+	p_j 
+	&= 2^{-\frac{1}{|S|} \sum_{s \in S}(C_j^s \log_2 q_j^s + (1-C_j^s) \log_2 (1-q_j^s))}
+\end{align*}
+The perplexity of a data set is defined as the average of perplexities in all positions.
+Thus, a smaller perplexity value indicates a better consistency between the click model and the actual click data.
 
-\begin{loglisting}
-\begin{algorithmic}
-\State 0 qid:18219 1:0.052893 2:1.000000 3:0.750000 4:1.000000 ... 46:0.966667
-\State \hspace*{25pt} \#docid = GX004-93-7097963 inc = 0.0428115405134536 prob = 0.860366
-\State 1 qid:18219 1:0.026446 2:0.750000 3:0.750000 4:0.500000 ... 46:0.266667
-\State \hspace*{25pt} \#docid = GX020-25-8391882 inc = 1 prob = 0.115043
-\State 0 qid:18219 1:0.029752 2:0.000000 3:1.000000 4:1.000000 ... 46:0.100000
-\State \hspace*{25pt} \#docid = GX025-94-0531672 inc = 1 prob = 0.141903
-\end{algorithmic}
-\caption{Example rows from XXXX}
-\label{alg:dataset_example}
-\end{loglisting}
+\subsubsection{Click-Trough-Rate prediction (CTR)}
+The purpose of click-through rates is to measure the ratio of clicks to impressions of an document.
+Generally the higher the CTR the higher change of that document being clicked.
+CTR can be formularized as following equation:
+\begin{align*}
+	CTR = \frac{clicks}{impression} \times 100
+\end{align*}
 
+\subsubsection{Relevance prediction}
+Relevance prediction was used to evaluate performance of DBN model \cite[p. 6]{Chapelle2009}.
+The accuracy of CTR prediction may not directly translate to relevance, especially when we were to evaluate TCM.
+On TCM, the CTR of a particular document can be very low even if the document is relevant.
+This can happen because on TCM, we look over the whole task instead of single query, and the second time this document reappear, the user tend to ignore it by the freshness assumption.
+Therefore, relevance prediction can be used as additional inference of relevancy.
+
+\fixme{TODO:: add more info about general relevance algorithm}
+
+\subsubsection{others}
+..
 
 \subsection{Evaluation setup}
 The experiment was run ...

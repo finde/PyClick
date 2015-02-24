@@ -16,6 +16,8 @@
 
 %\documentstyle[nips13submit_09,times,art10]{article} % For LaTeX 2.09
 
+\newcommand\fixme[1]{\textcolor{red}{#1}}
+
 \newenvironment{loglisting}[1][htb]
 {\renewcommand{\algorithmcfname}{Log listing}% Update algorithm name
   \begin{algorithm}[#1]%
@@ -58,9 +60,10 @@ Finde Xumara \\
 \input{4_analysis.tex}
 \input{5_conclusions.tex}
 
-\clearpage
-
 \bibliography{references}{}
 \bibliographystyle{plain}
+
+\newpage
+\input{appendix.tex}
 
 \end{document}
