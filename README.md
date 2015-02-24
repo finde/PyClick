@@ -17,7 +17,7 @@ It currently additionally to PyClick implements the TCM Model
 #### Example
 To compare TCM with the other implemented models use:
  
- ```python example/YandexExample.py data_set number_of_sessions```
+ ```python example/YandexExample.py session_data relevance_data number_of_sessions```
 
 This will compare the models on a Yandex Click log, for which the description is found [here](http://imat-relpred.yandex.ru/en/datasets). This dataset is not included here. The number_of_sessions variable will default to 1000
 
