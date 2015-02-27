@@ -37,11 +37,11 @@ def main(sessions_file, relevance_file, n_sessions):
 
     classes = [
         UBM,
-        TCM,
-        SimpleDCM,
-        SimpleDBN,
-        DCM,
-        DBN,
+        #TCM,
+        #SimpleDCM,
+        #SimpleDBN,
+        #DCM,
+        #DBN,
         #FCM,
         #VCM
     ]
@@ -53,6 +53,7 @@ def main(sessions_file, relevance_file, n_sessions):
     ll = Loglikelihood()
     perp = Perplexity()
     ranking = RankingPerformance(true_relevances)
+    ctr_pred = ClickThroughRatePrediction()
 
     for click_model_class in classes:
 
@@ -76,18 +77,17 @@ def main(sessions_file, relevance_file, n_sessions):
         print perplexity, 
         print " ".join(["%.4f" % v for v in perplexity_at_rank])
         
-        print "Relevance prediction MSE"
+        print "Relevance prediction RMSE"
         rel_score = rel_pred.evaluate(click_model, test)
         print rel_score
 
         print "Relevance Ranking"
-        rank_score = ranking.evaluate(click_model, train+test)
+        rank_score = ranking.evaluate(click_model, test)
         print rank_score
         
         print 'Click through rate prediction'
-        print 'Not yet implemented'
-        ctr_score = 0
-
+        ctr_score = ctr_pred.evaluate(click_model, train+test)
+        print 'MSE of CTR-Prediction',ctr_score
         print ""
 
         tableData.append([click_model_class.__name__, log_likelihood, perplexity, rel_score, rank_score, ctr_score, training_time])
@@ -104,5 +104,5 @@ if __name__ == '__main__':
     if len(sys.argv) >= 4:
         sessions = sys.argv[3]
     else:
-        sessions = 100
+        sessions = 1000
     main(session_data, relevance_data, sessions)
