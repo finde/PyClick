@@ -1,7 +1,7 @@
 from __future__ import division
 from abc import abstractmethod
 from click_models.Constants import MAX_DOCS_PER_QUERY
-from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_squared_error, roc_auc_score
 import numpy as np
 import math
 from click_models.TCM import TCM
@@ -19,9 +19,9 @@ class EvaluationMethod(object):
 
     @abstractmethod
     def evaluate(self, model, sessions, **kwargs):
-    """
-        Classes must implement this evaluation method and return a measure.
-    """
+        """
+            Classes must implement this evaluation method and return a measure.
+        """
         pass
 
 
@@ -179,7 +179,8 @@ class RelevancePrediction(EvaluationMethod):
 
     def evaluate(self, model, sessions, **kwargs):
         """
-            Returns the RMSE of the true relevances and the predicted relevances by the model.
+            Returns the AUC of the true relevances and the predicted relevances by the model.
+            AUC: a statistically consistent and more discriminating measure than accuracy. Charles X. Ling and Jin Huang and Harry Zhang. 2003
         """
 
         # Get the predicted relevances
@@ -209,9 +210,9 @@ class RelevancePrediction(EvaluationMethod):
 
         assert(len(pred_relevances) == len(true_relevances))
         
-        # Compute the RMSE
-        error = math.sqrt(mean_squared_error(true_relevances, pred_relevances))
-        return error
+        auc = roc_auc_score(true_relevances, pred_relevances)
+
+        return auc
 
 
 class RankingPerformance(EvaluationMethod):
@@ -229,7 +230,7 @@ class RankingPerformance(EvaluationMethod):
         
         # Only use queries that occur more than 10 times and have a true relevance
         counter = collections.Counter([session.query for session in sessions])
-        useful_sessions = [query_id for query_id in counter if counter[query_id] >= 10 and query_id in self.relevances]
+        useful_sessions = [query_id for query_id in counter if counter[query_id] >= 2 and query_id in self.relevances]
         
 
         # Group sessions by query
@@ -248,10 +249,11 @@ class RankingPerformance(EvaluationMethod):
         for query_id in useful_sessions:
             sessions = sessions_dict[query_id]
             pred_rels = model.get_relevances(sessions)
-
+            i = 0
             for session in sessions:
                 for result in session.web_results:
                     predicted[result.object] = pred_rels[i]
+                    i += 1
             
             rel = self.relevances[query_id]
             ranking = sorted(predicted.values(),reverse = True)

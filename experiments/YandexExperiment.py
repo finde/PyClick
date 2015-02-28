@@ -46,14 +46,14 @@ def main(sessions_file, relevance_file, n_sessions):
         #VCM
     ]
 
-    headers = ['Model', 'LL', 'Perp', 'Rel.Pred.MSE', 'Ranking.NDCG', 'CTR Pred.', 'Comp. Time.']
+    headers = ['Model', 'LL', 'Perp', 'Rel.Pred.AUC', 'Ranking.NDCG', 'CTR Pred.', 'Comp. Time.']
     tableData = []
     true_relevances = parse_yandex_relevances(os.path.join(this_directory, relevance_file))  
     rel_pred = RelevancePrediction(true_relevances)
     ll = Loglikelihood()
     perp = Perplexity()
     ranking = RankingPerformance(true_relevances)
-    ctr_pred = ClickThroughRatePrediction()
+    ctr_pred = CTRPrediction()
 
     for click_model_class in classes:
 
@@ -77,7 +77,7 @@ def main(sessions_file, relevance_file, n_sessions):
         print perplexity, 
         print " ".join(["%.4f" % v for v in perplexity_at_rank])
         
-        print "Relevance prediction RMSE"
+        print "Relevance prediction AUC"
         rel_score = rel_pred.evaluate(click_model, test)
         print rel_score
 
@@ -85,9 +85,9 @@ def main(sessions_file, relevance_file, n_sessions):
         rank_score = ranking.evaluate(click_model, test)
         print rank_score
         
-        print 'Click through rate prediction'
+        print 'Click through rate prediction MSE'
         ctr_score = ctr_pred.evaluate(click_model, train+test)
-        print 'MSE of CTR-Prediction',ctr_score
+        print ctr_score
         print ""
 
         tableData.append([click_model_class.__name__, log_likelihood, perplexity, rel_score, rank_score, ctr_score, training_time])
