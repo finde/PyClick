@@ -59,7 +59,7 @@ def main(sessions_file, relevance_file, n_sessions):
         click_model = click_model_class(click_model_class.get_prior_values())
 
         start_time = time.time()
-        #click_model.train(train)
+        click_model.train(train)
         training_time = (time.time() - start_time)
         print("--- %s seconds ---" % training_time)
 
