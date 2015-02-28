@@ -2,6 +2,7 @@ import sys
 from session.Session import Session, Result
 import numpy as np
 from collections import defaultdict
+import pprint
 
 
 def transform_to_tasks(sessions):
@@ -87,16 +88,10 @@ def parse_yandex_relevances(relevances_filename):
             rel = float(rel.strip())
             if query_id not in relevances:
                 relevances[query_id] = dict()
-            query = relevances[query_id] 
+            query = relevances[query_id]             
             
-            if region_id not in query:
-                query[region_id] = dict()
-            region = query[region_id]
-            
-            region[url] = rel
-
-
-
+            query[url] = max(rel, query.get(url,0))
+    
     return relevances
 
 

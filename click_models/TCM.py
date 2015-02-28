@@ -78,6 +78,10 @@ class TCM(ClickModel):
 
 
     def get_previous_examination_chance(self, task):
+        """
+            Creates a list of lists where every entry (i,j) is the chance that
+            document at rank j is already shown in the i-th session in the task
+        """
         # P(H_ij = 1)
         previous_examination_chance = dict()
         beta = self.params[TCMExamination.NAME]
@@ -174,41 +178,33 @@ class TCM(ClickModel):
         return perplexity, perplexity_at_rank
 
 
-    def predict_click_probs(self, task):
+    def predict_click_probs(self, session, freshness = None):
         """
-            Predicts click probabilities for a given task
+            Predicts click probabilities for a given session
         """
         
 
-        #This works on task, should work on session, how do? Can't really get freshness right?
-        raise NotImplementedError
-
         beta = self.params[TCMExamination.NAME]
         alpha_1_value = self.params[TCMIntent.NAME].get_param(0, 0).get_value()
-        # alpha_2 = self.params[TCMAnother.NAME]
         alpha_3 = self.params[TCMFreshness.NAME]
         r_d = self.params[TCMRelevance.NAME]
+        
+        # If there is no a freshness given assume everything is fresh.
+        if not freshness:
+            freshness = [1] * len(session.web_results)
 
-        freshness = self.get_previous_examination_chance(task)
+        click_probs = []
 
-        prob_task = []
-
-        for s_idx, session in enumerate(task):
-            prob_session = []
-            # for each document
-            # j = document rank for current query
-            # d = document object
-            for j, d in enumerate(session.web_results):
+        for j, d in enumerate(session.web_results):
                 beta_j = beta.get_param(session, j).get_value()
                 r_ij = r_d.get_param(session, j).get_value()
 
-                f_ij = alpha_3.get_param(session, j).get_value() * freshness[s_idx][j] + (1 - freshness[s_idx][j])
+                f_ij = alpha_3.get_param(session, j).get_value() * freshness[j] + (1 - freshness[j])
 
                 p_click = alpha_1_value * beta_j * r_ij * f_ij
-                prob_session.append(p_click)
-            prob_task.append(prob_session)
+                click_probs.append(p_click)
 
-        return prob_task
+        return click_probs
 
 
     def from_JSON(self, json_str):

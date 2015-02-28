@@ -8,6 +8,7 @@ from click_models.TCM import TCM
 import collections
 
 CLICK_TRESHOLD = 0.5
+MINIMUM_OCCURENCES = 2
 
 class EvaluationMethod(object):
     """
@@ -63,8 +64,6 @@ class Perplexity(EvaluationMethod):
         perplexity_at_rank = [0.0] * MAX_DOCS_PER_QUERY
 
         if model.__class__ == TCM:
-            len_sessions = 0
-            loglikelihood = 0
             tasks = model._transform_sessions(sessions)
             for task in tasks:
                 freshness = model.get_previous_examination_chance(task)
@@ -72,16 +71,19 @@ class Perplexity(EvaluationMethod):
                     log_click_probs = model.get_log_click_probs(session, freshness = freshness[s_idx])
                     for rank, log_click_prob in enumerate(log_click_probs):
                         perplexity_at_rank[rank] += math.log(math.exp(log_click_prob), 2)
-
                     
             perplexity_at_rank = [2 ** (-x / len(sessions)) for x in perplexity_at_rank]
             perplexity = sum(perplexity_at_rank) / len(perplexity_at_rank)
         
         else:
             for session in sessions:
-                log_click_probs = model.get_log_click_probs(session)
-                for rank, log_click_prob in enumerate(log_click_probs):
-                    perplexity_at_rank[rank] += math.log(math.exp(log_click_prob), 2)
+                click_probs = model.predict_click_probs(session)
+                for rank, click_prob in enumerate(click_probs):
+                    if session.web_results[rank].click:
+                        p = click_prob
+                    else:
+                        p = 1-click_prob
+                    perplexity_at_rank[rank] += math.log(p, 2)
 
             perplexity_at_rank = [2 ** (-x / len(sessions)) for x in perplexity_at_rank]
             perplexity = sum(perplexity_at_rank) / len(perplexity_at_rank)
@@ -192,12 +194,9 @@ class RelevancePrediction(EvaluationMethod):
         for session in sessions:
             for rank, result in enumerate(session.web_results):
                 if session.query in self.relevances:
-                    if session.region in self.relevances[session.query]:
-                        if result.object in self.relevances[session.query][session.region]:
-                            true_rel =  self.relevances[session.query][session.region][result.object]
-                            true_relevances.append(true_rel)
-                        else:
-                            pred_relevances[current_i] = None
+                    if result.object in self.relevances[session.query]:
+                        true_rel =  self.relevances[session.query][result.object]
+                        true_relevances.append(true_rel)
                     else:
                         pred_relevances[current_i] = None
                 else:
@@ -228,9 +227,9 @@ class RankingPerformance(EvaluationMethod):
             Return the NDCG_5 of the rankings given by the model for the given sessions.
         """
         
-        # Only use queries that occur more than 10 times and have a true relevance
+        # Only use queries that occur more than MINUMUM_OCCURENCES times and have a true relevance
         counter = collections.Counter([session.query for session in sessions])
-        useful_sessions = [query_id for query_id in counter if counter[query_id] >= 2 and query_id in self.relevances]
+        useful_sessions = [query_id for query_id in counter if counter[query_id] >= MINIMUM_OCCURENCES and query_id in self.relevances]
         
 
         # Group sessions by query
@@ -247,33 +246,41 @@ class RankingPerformance(EvaluationMethod):
 
         # For every useful query get the predicted relevance and compute NDCG
         for query_id in useful_sessions:
-            sessions = sessions_dict[query_id]
-            pred_rels = model.get_relevances(sessions)
+            
+            rel = self.relevances[query_id]
+            ideal_ranking = sorted(rel.values(),reverse = True)
+            
+            # Only use query if there is a document with a positive ranking. (Otherwise IDCG will be 0 -> NDCG undetermined.
+            if not all(ideal_ranking):
+                not_useful += 1
+                continue
+
+            current_sessions = sessions_dict[query_id]
+            pred_rels = model.get_relevances(current_sessions)
             i = 0
-            for session in sessions:
+            for session in current_sessions:
                 for result in session.web_results:
                     predicted[result.object] = pred_rels[i]
                     i += 1
             
-            rel = self.relevances[query_id]
             ranking = sorted(predicted.values(),reverse = True)
             
-            # REGION HACK. Now does first region how to remove? Use query/region pairs for indexing of the queries?
-            ideal_ranking = sorted(rel[rel.keys()[0]].values(),reverse = True)
-            
-            # Only use query if there is a document with a positive ranking.
-            if not any(ideal_ranking):
-                not_useful += 1
-                continue
-            
+            cutoff = min(5,len(ideal_ranking))
+                        
             # Compute the NDCG
-            dcg = self.dcg(ranking[:5])
-            idcg = self.dcg(ideal_ranking[:5])
+            dcg = self.dcg(ranking[:cutoff])
+            idcg = self.dcg(ideal_ranking[:cutoff])            
             ndcg = dcg / idcg
+            
+            assert ndcg <= 1
 
             total_ndcg += ndcg
 
-        # Average NDCG over all queries
+        
+        # If too few queries there might not be any useful queries that also have a ranking in the true_relevances.
+        assert not len(useful_sessions)-not_useful is 0
+
+         # Average NDCG over all queries
         return total_ndcg / (len(useful_sessions)-not_useful)
             
 

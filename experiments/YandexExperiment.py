@@ -37,13 +37,11 @@ def main(sessions_file, relevance_file, n_sessions):
 
     classes = [
         UBM,
-        #TCM,
-        #SimpleDCM,
-        #SimpleDBN,
-        #DCM,
-        #DBN,
-        #FCM,
-        #VCM
+        TCM,
+        SimpleDCM,
+        SimpleDBN,
+        DCM,
+        DBN
     ]
 
     headers = ['Model', 'LL', 'Perp', 'Rel.Pred.AUC', 'Ranking.NDCG', 'CTR Pred.', 'Comp. Time.']
@@ -61,11 +59,9 @@ def main(sessions_file, relevance_file, n_sessions):
         click_model = click_model_class(click_model_class.get_prior_values())
 
         start_time = time.time()
-        click_model.train(train)
+        #click_model.train(train)
         training_time = (time.time() - start_time)
         print("--- %s seconds ---" % training_time)
-
-        #print click_model
 
         
         print "Log-likelihood"  
@@ -74,8 +70,8 @@ def main(sessions_file, relevance_file, n_sessions):
         
         print "Perplexity"
         perplexity, perplexity_at_rank = perp.evaluate(click_model, test)
-        print perplexity, 
-        print " ".join(["%.4f" % v for v in perplexity_at_rank])
+        print 'Total',perplexity
+        print 'At rank', " ".join(["%.4f" % v for v in perplexity_at_rank])
         
         print "Relevance prediction AUC"
         rel_score = rel_pred.evaluate(click_model, test)
@@ -94,7 +90,7 @@ def main(sessions_file, relevance_file, n_sessions):
 
     _format = 'grid'
     print '\n\nSUMMARY\n=========='
-    print 'Number of queries: ', n_sessions
+    print 'Number of queries: ', n_sessions 
     print tabulate(tableData, headers, tablefmt=_format)
 
 
