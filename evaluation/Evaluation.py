@@ -68,9 +68,14 @@ class Perplexity(EvaluationMethod):
             for task in tasks:
                 freshness = model.get_previous_examination_chance(task)
                 for s_idx, session in enumerate(task):
-                    log_click_probs = model.get_log_click_probs(session, freshness = freshness[s_idx])
-                    for rank, log_click_prob in enumerate(log_click_probs):
-                        perplexity_at_rank[rank] += math.log(math.exp(log_click_prob), 2)
+                    click_probs = model.predict_click_probs(session, freshness=freshness[s_idx])
+                    for rank, click_prob in enumerate(click_probs):
+                        if session.web_results[rank].click:
+                            p = click_prob
+                        else:
+                            p = 1-click_prob
+                        perplexity_at_rank[rank] += math.log(p, 2)
+
                     
             perplexity_at_rank = [2 ** (-x / len(sessions)) for x in perplexity_at_rank]
             perplexity = sum(perplexity_at_rank) / len(perplexity_at_rank)
