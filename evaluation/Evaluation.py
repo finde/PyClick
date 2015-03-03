@@ -8,7 +8,8 @@ from click_models.TCM import TCM
 import collections
 
 CLICK_TRESHOLD = 0.5
-MINIMUM_OCCURENCES = 2
+MINIMUM_OCCURENCES = 10
+CUTOFF = 5
 
 class EvaluationMethod(object):
     """
@@ -245,7 +246,6 @@ class RankingPerformance(EvaluationMethod):
                     sessions_dict[session.query] = []
                 sessions_dict[session.query].append(session)
         
-        predicted = dict()
         total_ndcg = 0
         not_useful = 0
 
@@ -263,18 +263,32 @@ class RankingPerformance(EvaluationMethod):
             current_sessions = sessions_dict[query_id]
             pred_rels = model.get_relevances(current_sessions)
             i = 0
+            
+            predicted = dict()
+
             for session in current_sessions:
                 for result in session.web_results:
                     predicted[result.object] = pred_rels[i]
                     i += 1
             
-            ranking = sorted(predicted.values(),reverse = True)
+            ranking = sorted([key for key in predicted], key = lambda key : predicted[key],reverse = True)
+            rels = []
+            broke = False
+            for r in ranking[:CUTOFF]:
+                try:
+                    rels.append( rel[r] )
+                except:
+                    broke = True
+                    break
             
-            cutoff = min(5,len(ideal_ranking))
-                        
+            if broke:
+                not_useful += 1
+                continue
+
+                                    
             # Compute the NDCG
-            dcg = self.dcg(ranking[:cutoff])
-            idcg = self.dcg(ideal_ranking[:cutoff])            
+            dcg = self.dcg(rels[:CUTOFF])
+            idcg = self.dcg(ideal_ranking[:CUTOFF])            
             ndcg = dcg / idcg
             
             assert ndcg <= 1
@@ -284,6 +298,8 @@ class RankingPerformance(EvaluationMethod):
         
         # If too few queries there might not be any useful queries that also have a ranking in the true_relevances.
         assert not len(useful_sessions)-not_useful is 0
+        print len(useful_sessions)-not_useful
+        print total_ndcg
 
          # Average NDCG over all queries
         return total_ndcg / (len(useful_sessions)-not_useful)
