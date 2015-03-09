@@ -198,7 +198,6 @@ class TCM(ClickModel):
         for j, d in enumerate(session.web_results):
                 beta_j = beta.get_param(session, j).get_value()
                 r_ij = r_d.get_param(session, j).get_value()
-
                 f_ij = alpha_3.get_param(session, j).get_value() * freshness[j] + (1 - freshness[j])
 
                 p_click = alpha_1_value * beta_j * r_ij * f_ij
