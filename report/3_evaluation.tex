@@ -20,7 +20,7 @@ Perplexity can be seen as the log-likelihood powers which are computed independe
 For example, we assume that $q_j^s$ is the probability of some click calculated from a click model, i.e. $P(C_j^s=1)$ where $C_j^s$ is a binary value indicating the click event at position $j$ in query session $s$. Then the click perplexity at position $j$ is computed as follows:
 \begin{align*}
 	p_j 
-	&= 2^{-\frac{1}{|S|} \sum_{s \in S}(C_j^s \log_2 q_j^s + (1-C_j^s) \log_2 (1-q_j^s))}
+	&= 2^{-\frac{1}{|S|} \sum_{s \in S}(C_j \log_2 q_j + (1-C_j) \log_2 (1-q_j))}
 \end{align*}
 The perplexity of a data set is defined as the average of perplexities in all positions.
 Thus, a smaller perplexity value indicates a better consistency between the click model and the actual click data.

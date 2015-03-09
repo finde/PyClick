@@ -2,15 +2,24 @@
 \label{sec:methodology}
 The different models we compare UBM, DCM, DBN and TCM on the Yandex dataset \cite{yandex}. In this section, we briefly describe their main characteristics and differences. We have implemented TCM ourselves, the other algorithms were taken from PyClick \cite{PyClick}.
 
-\subsection{DCM}
+\subsection{Click-through rate click model}
+The most simple click model, abbreviated as CTR, that actually tries to predict relevance for a query-documenent pair. The relevance is the only parameter in this model. The relevance in this model is simple defined as $a_u = \frac{\#\,of\,clicks}{\#\,of\,times\,shown}$. We included this model as a simple baseline that the models should improve upon.
+
+\subsection{Position based model}
+This model builds upon the CTR model. It adds a \texttt{position bias} where documents in a higher position are examined more often. A document can only be clicked if it was examined. The values for this position bias are taken from \cite{eye_track} and are $[.68, .61, .48, .34, .28, .2, .11, .1, .08, .06]$.
+
+\subsection{Cascade model}
+\fixme{Explain Cascade model}
+
+\subsection{Dependent Click Model}
 The dependent click model was first proposed by Guo et al. in \cite{Guo2009}. In the paper they propose a new click model which can handle multiple clicks per query by introducing a position dependent parameter $lambda_j$ to reflect the chance that the user would like to see more results after a click at position $j$. A graphical representation of the model is presented in Figure\ref{fig:dcm_gm} 
 
-\subsection{DBN}
-The dynamic bayesian network is an extension to the traditional cascade model proposed by Chapelle and Zhang in \cite{Zhang2011}. For a given position $j$, in addition to observed variable $C_j$ indicating whether there was a click or not at this position, the following latent variable are defined to model examination, perceived relevance and actual relevance, respectedly:
+\subsection{Dynamic Bayesion Network}
+The dynamic bayesian network click model is an extension to the traditional cascade model proposed by Chapelle and Zhang in \cite{Zhang2011}. For a given position $j$, in addition to observed variable $C_j$ indicating whether there was a click or not at this position, the following latent variable are defined to model examination, perceived relevance and actual relevance, respectedly:
 \begin{itemize}
-	\item $E_j$: did the user $examine$ the document?
-	\item $A_j$: was the user $attracted$ by the document?
-	\item $S_j$: was the user $satisfied$ by the clicked document?
+	\item $E_j$: Did the user $examine$ the document?
+	\item $A_j$: Was the user $attracted$ by the document?
+	\item $S_j$: Was the user $satisfied$ by the clicked document?
 \end{itemize}
 They introduce a variable $s_u$ for each document $u$ which describes the relevance of the document for this query. When the user clicks on this document, there is a certain chance that the user will be satisfied. If the user is not satisfied, he continues to examine the next document with a probability $\gamma$ and stops otherwise. The parameter $\gamma$ is known as the 'perseverance'. A graphical representation of the model is presented in Figure \ref{fig:dbn_gm}. 
 
@@ -76,7 +85,7 @@ They introduce a variable $s_u$ for each document $u$ which describes the releva
 	\caption{The graphical model of DCM and DBN.}
 \end{figure}
 
-\subsection{UBM}
+\subsection{User Browsing Model}
 In \cite{Dupret2008}, Dupret and Piwowarski propose a new click model called the User Browsing Model (UBM). The main difference between UBM and other models is that UBM takes the distance into account from the current document \(u_j\) to the last clicked document \(u_{j'}\) for determining the probability that the user continues browsing:
 \[P(E_j =1 \mid C_{j'}=1, C_{j'+1}=0, \dots, C_{j-1}=0) = \gamma_{jj'}\]
 The probability that a document at rank \(j\) is examined \(E_j\) therefore depends on all possible paths the user could have taken to arrive at this document:
@@ -112,7 +121,7 @@ A graphical representation of the model is presented in Figure~\ref{fig:ubm_gm}.
 	\label{fig:ubm_gm}
 \end{figure}
 
-\subsection{TCM}
+\subsection{Task-centric Click Model}
 \label{sec:methodology_tcm}
 The Task-centric Click Model (TCM) was first proposed by Zhang et al. in \cite{Zhang2011}. In the paper they propose a new click model which can handle multiple clicks of multiple queries in a task by introducing two new biases. The first bias indicates that users tend to express their information needs incrementally in a task, thus perform more clicks as their needs become clearer. The other bias indicates that users tend to click fresh documents that are not included in the results of previous queries. In their paper, they named the first assumption as \texttt{query bias}, and the second assumption as \texttt{duplicate bias}. A graphical representation of the state-of-the-art of the model is presented in Figure\ref{fig:dcm_gm} and the notations used in TCM are described in Table\ref{table:tcm_notations}. 
 
@@ -222,9 +231,5 @@ The graphical model of our TCM implementation is presented in Fig \ref{fig:tcm_g
 	\caption{The graphical model of state-of-the-art TCM and simplified TCM.}
 \end{figure}
 
-\fixme{TODO:: add more click model and order them correctly (CTR first ...)}
-
-\subsection{CTR}
-\subsection{PBM}
-\subsection{CM (Cascade model)}
-\subsection{CCM}
+\subsection{Click Chain Model}
+\fixme{Explain ccm here}
