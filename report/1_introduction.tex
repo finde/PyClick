@@ -1,14 +1,14 @@
 \section{Introduction}
 Modeling user behavior on a search engine result page is important for understanding the users and supporting simulation experiments.
-As result pages become more complex, click models evolve as well in order to capture additional aspects of user behavior in response to new forms of result presentation.
-In recent years many models have been proposed that are aimed at predicting clicks of web search users. 
+As result pages become more complex, click models have to evolve as well in order to capture additional aspects of user behavior in response to new forms of result presentation.
+In recent years many models have been proposed that are aimed at predicting the behaviour of web search users. 
 
-In this report, we will implement and evaluate different click models using evaluation metrics.
-These click models include dependent click model (DCM) \cite{Guo2009}, dynamic bayesian network click model (DBN) \cite{Chapelle2009}, user browsing model (UBM) \cite{Dupret2008}, and task-centric click model (TCM) \cite{Zhang2011}.
-The evaluation metrics include likelihood, perplexity, click through rate prediction, relevance prediction, computation time and ranking performance.
+In this report, we will implement and evaluate different click models using multiple evaluation metrics.
+These click models include the Dependent Click Model (DCM) \cite{Guo2009}, Dynamic Bayesian Network click model (DBN) \cite{Chapelle2009}, User Browsing Model (UBM) \cite{Dupret2008}, and Task-centric Click Model (TCM) \cite{Zhang2011}.
+The evaluation metrics include likelihood, perplexity, click through rate prediction, relevance prediction, ranking performance and computation time.
 By doing this experiment we can know the performance of each different click model and this information can be used as a benchmark of the next click model proposal.
 
 %report organization
 This report is organized as follows.
-Section~\ref{sec:methodology} describes the methods and algorithms used in our implementation.
-The experiments and data source information will be covered in Section~\ref{sec:evaluation}, followed by the Section~\ref{sec:analysis} for the performance analysis.
+In Section~\ref{sec:methodology} we willl describe the different click models and evaluation algorithms used in our experiments.
+The experiments and data source information will be covered in Section~\ref{sec:evaluation}, followed by an analysis of these experiments in Section~\ref{sec:analysis}.

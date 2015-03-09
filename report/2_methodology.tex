@@ -1,6 +1,6 @@
 \section{Methodology}
 \label{sec:methodology}
-We compare UBM, DCM, DBN and TCM on the Yandex dataset \cite{yandex}. In this section, we briefly describe their main characteristics and differences. We have implemented TCM ourselves, the other algorithms were taken from PyClick \cite{PyClick}.
+The different models we compare UBM, DCM, DBN and TCM on the Yandex dataset \cite{yandex}. In this section, we briefly describe their main characteristics and differences. We have implemented TCM ourselves, the other algorithms were taken from PyClick \cite{PyClick}.
 
 \subsection{DCM}
 The dependent click model was first proposed by Guo et al. in \cite{Guo2009}. In the paper they propose a new click model which can handle multiple clicks per query by introducing a position dependent parameter $lambda_j$ to reflect the chance that the user would like to see more results after a click at position $j$. A graphical representation of the model is presented in Figure\ref{fig:dcm_gm} 
@@ -220,7 +220,11 @@ The graphical model of our TCM implementation is presented in Fig \ref{fig:tcm_g
 	
 	
 	\caption{The graphical model of state-of-the-art TCM and simplified TCM.}
-	\label{fig:tcm_gm_new}
 \end{figure}
 
-\fixme{TODO:: add more click model}
+\fixme{TODO:: add more click model and order them correctly (CTR first ...)}
+
+\subsection{CTR}
+\subsection{PBM}
+\subsection{CM (Cascade model)}
+\subsection{CCM}

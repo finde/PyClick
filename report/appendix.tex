@@ -1,9 +1,9 @@
 \appendix
-{\LARGE \textbf{APPENDICES}}\\
-
+\section{Appendix}
+\label{app:tcm_eq}
 We give here some details about the inference in our TCM implementation outlined in section \ref{sec:methodology_tcm}.
 
-\section{Click probability}
+\subsection{Click probability}
 For $P(F_{i,j}=1)$ we introduce a variable $f_{i,j}$, which will be derived later. \\
 By assumption that $M_i, E_{i,j},R_{i,j}$and$F_{i,j}$ are independent, click probability can be formularize as:
 \begin{align}
@@ -13,14 +13,14 @@ P(C_{i,j} = 1)
 \label{eq:proba_click}
 \end{align}
 
-\section{Probability of the query match user intention}
+\subsection{Probability of the query match user intention}
 Because we remove equation that depends on $\alpha_2$, we can now set $\alpha_1$ as MLE.
 \begin{align*}
 P(M_i = 1) 
 &= \alpha_1 \\
 \end{align*}
 
-\section{Probability of user submit next query}
+\subsection{Probability of user submit next query}
 User submit next query if the query does not match user intention ($\alpha_1$) or user want to search more.
 \begin{align*}
 P(N_i=1) 
@@ -38,7 +38,7 @@ P(N_i=1|M_i=1)
 &= \frac{n_i + \alpha_1 - 1}{\alpha_1}
 \end{align*}
 
-\section{Relevance probability}
+\subsection{Relevance probability}
 \begin{align*}
 P(R_{i,j} = 1)
 &= r_{i,j} \\
@@ -99,7 +99,7 @@ P(R_{i,j}=1 | C) &= c_{i,j} + (1-c_{i,j}) \frac { (1 - (\alpha_1 \beta_j f_{i,j}
 &= c_{i,j} + (1-c_{i,j}) \frac{r_{i,j} - \alpha_1 \beta_j f_{i,j} r_{i,j} }{ 1 - \alpha_1 \beta_j f_{i,j} r_{i,j}}
 \end{align}
 
-\section{Examination probability}
+\subsection{Examination probability}
 \begin{align}
 P(E_{i,j} = 1) 
 &= \beta_j \\
@@ -128,7 +128,7 @@ P(E_{i,j}=1 | C)
 & = c_{i,j} + (1-c_{i,j}) \frac {\beta_j - \alpha_1 \beta_j f_{i,j} r_{i,j}} { 1 - \alpha_1 \beta_j f_{i,j} r_{i,j}}
 \end{align}
 
-\section{Freshness probability}
+\subsection{Freshness probability}
 \begin{align}
 P(F_{i,j} = 1 | H_{i,j} = 1) &= \alpha_3 \\
 \alpha_3 &= \frac{1}{|S_{i,j}|} \sum_{q \in S} \sum_{(i,j) \in q} P(F{i,j}=1 | H_{i,j}=1, C)
