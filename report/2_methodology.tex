@@ -9,7 +9,9 @@ The most simple click model, abbreviated as CTR, that actually tries to predict 
 This model builds upon the CTR model. It adds a \texttt{position bias} where documents in a higher position are examined more often. A document can only be clicked if it was examined. The values for this position bias are taken from \cite{eye_track} and are $[.68, .61, .48, .34, .28, .2, .11, .1, .08, .06]$.
 
 \subsection{Cascade model}
-\fixme{Explain Cascade model}
+Cascade model assumes that users abandon the query session after the first click and hence does not provide a complete picture of how multiple clicks arise in a query session and how to estimate document relevance from such data \cite{Kempe2008, Craswell2008}. 
+This model also assume that the user views search results from top to bottom, deciding whether to click each result before moving to the next. 
+To observe a click, the user must have decided both to click and skip the ranks above.
 
 \subsection{Dependent Click Model}
 The dependent click model was first proposed by Guo et al. in \cite{Guo2009}. In the paper they propose a new click model which can handle multiple clicks per query by introducing a position dependent parameter $lambda_j$ to reflect the chance that the user would like to see more results after a click at position $j$. A graphical representation of the model is presented in Figure\ref{fig:dcm_gm} 
@@ -121,6 +123,60 @@ A graphical representation of the model is presented in Figure~\ref{fig:ubm_gm}.
 	\label{fig:ubm_gm}
 \end{figure}
 
+\subsection{Click Chain Model}
+In 2009, Fan Guo et al, proposed a bayesian based click model \cite{Guo2009_CCM}. 
+CCM shares the following assumptions with the cascade model and DCM: 
+(1) users are homogeneous: their information needs are similar given the same query; 
+(2) decoupled examination and click events: click probability is solely determined by the examination probability and the document relevance at a given position; 
+(3) cascade examination: examination is in strictly sequential order with no breaks.
+
+
+This model can be formalized with the following conditional probabilities in which $R_j$ is the relevance variable of document $u$ at position $j$, $E_j$ is the examination variable, and $\alpha$’s form the set of user behavior parameters:
+\begin{align}
+P(C_j=1|E_j=0) &= 0 \\
+P(C_j=1|E_j=1, R_j) &= R_j \\
+P(E_{j+1}=1|E_j=0) &= 0 \\
+P(E_{j+1}=1|E_j=1,C_j=0) &= \alpha_1 \\
+P(E_{j+1}=1|E_j=1,C_j=1,R_j) &= \alpha_2(1-R_j)+\alpha_3 R_j \\
+\end{align}
+
+A graphical representation of the model is presented in Figure~\ref{fig:ccm_gm}.
+
+\begin{figure}[ht!]
+	\begin{center}
+		\begin{tabular}{c}
+			\begin{tikzpicture}
+			
+			% Define nodes
+			\node[obs, minimum size=1cm]                      	(c) {$C_j$};
+			\node[latent, above=.6cm of c, minimum size=1cm]  	(a) {$R_j$};			
+			\node[latent, below=.6cm of c, minimum size=1cm]  	(e) {$E_j$};	
+			
+			\node[obs, minimum size=1cm, right=3cm of c]        (c_1) {$C_{j+1}$};
+			\node[latent, above=.6cm of c_1, minimum size=1cm]  (a_1) {$R_{j+1}$};		
+			\node[latent, below=.6cm of c_1, minimum size=1cm] 	(e_1) {$E_{j+1}$};	
+
+			%\node[const, above=.8cm of a]  									(a_u) {$\alpha_u$};
+			%\node[const, left=1cm of e, minimum size=1cm]  	(e_p) {$\gamma_{jj'}$};	
+			
+			% Connect the nodes
+			\edge {a,e} {c} ; %
+			\edge {a,e,c} {e_1} ; %
+			%\edge {e_p} {e} ; %
+			%\edge {a_u} {a} ; %
+			\edge {a_1,e_1} {c_1} ; %
+			
+			% Plates
+			\plate [inner sep=.5cm, text centered] {u_j} {(a)(e)(c)} {document $u_j$};
+			\plate [inner sep=.5cm, text centered] {u_j_1} {(a_1)(e_1)(c_1)} {document $u_{j+1}$};
+			
+			\end{tikzpicture}
+		\end{tabular}
+	\end{center}
+	\caption{The graphical model of CCM.}	
+	\label{fig:ccm_gm}
+\end{figure}
+
 \subsection{Task-centric Click Model}
 \label{sec:methodology_tcm}
 The Task-centric Click Model (TCM) was first proposed by Zhang et al. in \cite{Zhang2011}. In the paper they propose a new click model which can handle multiple clicks of multiple queries in a task by introducing two new biases. The first bias indicates that users tend to express their information needs incrementally in a task, thus perform more clicks as their needs become clearer. The other bias indicates that users tend to click fresh documents that are not included in the results of previous queries. In their paper, they named the first assumption as \texttt{query bias}, and the second assumption as \texttt{duplicate bias}. A graphical representation of the state-of-the-art of the model is presented in Figure\ref{fig:dcm_gm} and the notations used in TCM are described in Table\ref{table:tcm_notations}. 
@@ -230,6 +286,3 @@ The graphical model of our TCM implementation is presented in Fig \ref{fig:tcm_g
 	
 	\caption{The graphical model of state-of-the-art TCM and simplified TCM.}
 \end{figure}
-
-\subsection{Click Chain Model}
-\fixme{Explain ccm here}
