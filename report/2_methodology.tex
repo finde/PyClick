@@ -14,7 +14,7 @@ This model also assume that the user views search results from top to bottom, de
 To observe a click, the user must have decided both to click and skip the ranks above.
 
 \subsection{Dependent Click Model}
-The dependent click model was first proposed by Guo et al. in \cite{Guo2009}. In the paper they propose a new click model which can handle multiple clicks per query by introducing a position dependent parameter $lambda_j$ to reflect the chance that the user would like to see more results after a click at position $j$. A graphical representation of the model is presented in Figure\ref{fig:dcm_gm} 
+The dependent click model was first proposed by Guo et al. in \cite{Guo2009_DCM}. In the paper they propose a new click model which can handle multiple clicks per query by introducing a position dependent parameter $lambda_j$ to reflect the chance that the user would like to see more results after a click at position $j$. A graphical representation of the model is presented in Figure\ref{fig:dcm_gm} 
 
 \subsection{Dynamic Bayesion Network}
 The dynamic bayesian network click model is an extension to the traditional cascade model proposed by Chapelle and Zhang in \cite{Zhang2011}. For a given position $j$, in addition to observed variable $C_j$ indicating whether there was a click or not at this position, the following latent variable are defined to model examination, perceived relevance and actual relevance, respectedly:
@@ -124,7 +124,7 @@ A graphical representation of the model is presented in Figure~\ref{fig:ubm_gm}.
 \end{figure}
 
 \subsection{Click Chain Model}
-In 2009, Fan Guo et al, proposed a bayesian based click model \cite{Guo2009_CCM}. 
+In \cite{Guo2009_CCM}, Fan Guo et al, proposed a bayesian based click model which was based on position bias assumption, named Click chain model (CCM). 
 CCM shares the following assumptions with the cascade model and DCM: 
 (1) users are homogeneous: their information needs are similar given the same query; 
 (2) decoupled examination and click events: click probability is solely determined by the examination probability and the document relevance at a given position; 
