@@ -1,68 +1,74 @@
-\section{Evaluation}
+\section{Evaluation Measures}
 \label{sec:evaluation}
 %Evaluation:
 %	Purpose of the evaluation
 %	Data used in the evaluation
 %	Evaluation setup
 %	Results (present as many results as necessary to illustrate the work you have done on the project - tables are a good way and required by the assignment; plots can be another good way)
+To equally evaluate each click model's performance, we use evaluation metrics that are proposed along with the click models. The evaluation metrics used in this experiment are listed below:
 
-% purpose of evaluation
-\subsection{Evaluation Criteria}
-To equally evaluate each click model's performance, we use evaluation metrics that are proposed along with the click models. The evaluation metrics used in this experiment are listed as follow:
+\subsection{Loglikelihood}
+1Loglikelihood is the default evaluation metric in machine learning. It says something about the likelihood of the data give the model. In Equation~\ref{eq:loglikelihood} the calculation of the loglikelihood of a click model and a set of sessions can be seen, where $\mathcal{L}\mathcal{L}(S|\mathbf{M})$ is the loglikelihood of the sessions given the models parameters, $S$ the set of sessions, $\mathbf{M}$ the model and its parameters, $r$ is the rank of a particular document in a session and $c_r^{(s)}$ a indicator function that is $1$ when the document at rank $r$ in session $s$ was clicked and $0$ otherwise.
+\begin{align}
+	\mathcal{L}\mathcal{L}(S|\mathbf{M}) = \frac{1}{|S|}\sum_{s \in S} \frac{1}{|s|} \sum_{r = 1}^{|s|} \log P(C_r=c_r^{(s)}|M, C_{r-1}, C_{r-2}\dots C_1)
+	\label{eq:loglikelihood}
+\end{align}
 
-\subsubsection{Likelihood and Perplexity}
-Likelihood is already implied in each click model during E-step, where it should get better for every EM iteration. 
-However, this evaluation can become interesting when we compare one click model to the others.
 
-Click perplexity is a widely used metric for evaluation click model accuracy.
-Perplexity can be seen as the log-likelihood powers which are computed independently at each position as also mentioned at \cite{Zhang2011} and \cite{Dupret2008}. 
-For example, we assume that $q_j^s$ is the probability of some click calculated from a click model, i.e. $P(C_j^s=1)$ where $C_j^s$ is a binary value indicating the click event at position $j$ in query session $s$. Then the click perplexity at position $j$ is computed as follows:
-\begin{align*}
-	p_j 
-	&= 2^{-\frac{1}{|S|} \sum_{s \in S}(C_j \log_2 q_j + (1-C_j) \log_2 (1-q_j))}
-\end{align*}
-The perplexity of a data set is defined as the average of perplexities in all positions.
-Thus, a smaller perplexity value indicates a better consistency between the click model and the actual click data.
+\subsection{Perplexity}
+Click perplexity is a widely used metric for evaluating click model accuracy. It measures how surprised a model is to see $c_r^{(s)}$ under the current parameters. Perplexity is calculated for every rank individually, as to see whether some models perform better on documents higher on the SERP page then documents ranked lower on the SERP. It is used as a evaluation metric in \cite{Zhang2011} and \cite{Dupret2008}. The calculation of perplexity can be seen in Equation~\ref{eq:perplexity}.
+\begin{align}
+	Perplexity_r &= 2^{-\frac{1}{|S|} \sum_{s \in S}(c_r^{(s)} \log_2 p_r^{(s)} + (1-c_r^{(s)} ) \log_2 (1-p_r^{(s)}))} \label{eq:perplexity} \\
+	p_r^{(s)} &= P(C_r = 1 | \mathbf{M}) \nonumber
+\end{align}
+The perplexity of a data set is defined as the average of perplexities over all positions. Thus, a smaller perplexity value indicates a better consistency between the click model and the actual click data.
 
-\subsubsection{Click-Trough-Rate prediction (CTR)}
+\subsection{Click-Trough-Rate prediction (CTR)}
 The purpose of click-through rates is to measure the ratio of clicks to impressions of an document.
-Generally the higher the CTR the higher change of that document being clicked.
-The click-through rate is defined as:
+Generally the higher the CTR the higher chance of that document being clicked.
+The click-through rate of a document $d$ is defined as:
 \begin{align*}
-	CTR = \frac{\# \, of \, clicks}{\# \, of \, impression}
+	CTR_d = \frac{1}{|S_d|} \sum_{s_d} c_{r_d}^{(s_d)}
 \end{align*}
+where $S_d$ is the set of sessions where document $d$ appears.
 A way to use this as an evaluation measure is proposed in \cite[p. 4]{Chapelle2009}. In the same way we calculate the CTR prediction using the following protocol:
 \begin{enumerate}
-	\item Retrieve all the sessions related to a given query
-	\item Consider an url that appeared both in position 1 and some other positions
-	\item Hold out as test sessions all the sessions in which that url appeared in position 1
-	\item Train the model on the remaining sessions and predict $a_u$
-	\item Compute the test CTR in position 1 on the held-out sessions
-	\item Compute an error between these two quantities
-	\item  Average the error on all such urls and queries, weighted by the number of test sessions
+	\item Retrieve all sessions related to a given query.
+	\item Consider an url that appears both in position 1 and some other positions.
+	\item Hold out as test sessions all the sessions in which that url appeared in position 1.
+	\item Train the model on the remaining sessions and predict the relevance.
+	\item Compute the test CTR in position 1 on the held-out sessions.
+	\item Compute an error between these two quantities.
+	\item Average the error on all such urls and queries, weighted by the number of test sessions.
 \end{enumerate}
 
-The error measure we use is the Mean-Square-Error (MSE).
+The error measure we use is the Root-Mean-Square-Error (RMSE).
 
-\subsubsection{Relevance prediction}
-Relevance prediction was used to evaluate performance of DBN model \cite[p. 6]{Chapelle2009}.
-The accuracy of CTR prediction may not directly translate to relevance, especially when we were to evaluate the whole task instead of single query.
-In this case, the CTR of a particular document highly dependent on the user-model assumption.
-For example if the user tends to ignore the next time this document reappear, CTR will be low even if the document is relevant.
-Therefore, relevance prediction can be used as additional inference of relevancy.
+\subsection{Relevance prediction}
+Relevance prediction was used to evaluate performance of the DBN model \cite[p. 6]{Chapelle2009}.
+The accuracy of CTR prediction may not directly translate to relevance, especially when we were to evaluate the whole task instead of a single query.
+In this case, the CTR of a particular document is highly dependent on the user-model assumption.
+For example if a user tends to ignore a document that isn't fresh, CTR will be low even if the document is relevant.
+To measure relevance prediction we use a hand annotated set of relevances. We then use the Area Under the Curve (AUC) between the annotated relevances and the predicted relevances as an evaluation measure. We also measure the Pearson correlation between the two. 
 
-\fixme{TODO:: add more info about general relevance algorithm}
+\subsection{Predicted relevance as a ranking feature}
+In this set of experiments we use the predicted relevance directly to rank urls, we use the model as a ranker. To evaluate the performance of a ranker we use the Normalized Discounted Cumulative Gain (NDCG) \cite{NDCG}, for which we use a cutoff at five (NDCG@5). To calculate the NDCG@5 we only consider the documents for which we have annotated relevances. All these queries are then averaged to calculate the ranking performance of the click model. The algorithm can be seen below:
 
-\subsubsection{Predicted relevance as a ranking feature}
-The accuracy of CTR prediction may not directly translate to relevance. However we can use these relevances by focusing on the relative order of the relevances. For every query for which we have editorial judgements we use the predicted relevances to rank the documents. To evaluate the performance of a ranker we can use the Normalized Discounted Cumulative Gain (NDCG) \cite{NDCG}, for which we use a cutoff at five (NDCG$_5$). All these queries are then averaged to calculate the ranking performance of the click model.
+\begin{enumerate}
+	\item Retrieve all session that appear more than 10 times.
+	\item Filter out the sessions that don't appear in the editorial judgements.
+	\item Train the model on the sessions and predict relevance for the sessions.
+	\item Sort the urls w.r.t the predicted relevance given by the model.
+	\item Compute the NDCG@5.
+	\item Average over all sessions.
+\end{enumerate}
 
-\subsubsection{Computation time}
-Historically in Machine Learning a big problem in creating accurate models was the amount of data that was available. However this is no longer the case, we are mostly restricted by the time that it takes to learn a model from the large amount of data that we currently have. So an important feature of a succesful click model is that it should be able to efficiently compute its parameters. Therefor we also decided to look at the computation time it takes to train the click models.
+\subsection{Computation time}
+Historically in machine learning a big problem in creating accurate models was the amount of data that was available. However this is no longer the case, we are mostly restricted by the time that it takes to learn a model from the large amount of data that we currently have. So an important feature of a succesful click model is that it should be able to efficiently compute its parameters. Therefore, we also decided to look at the computation time it takes to train the click models.
 
-\subsection{Evaluation setup}
-The experiment was run the first 1 million sessions of click logs data set.
+\fixme{TODO: Add some info about machine it is run on???}
 
-\fixme{TODO: Run experiment on larger data set}
+\section{Experiments}
 
 \subsection{Results}
 In Table~\ref{table:results} one can see the results of the experiments.
