@@ -21,7 +21,7 @@ Click perplexity is a widely used metric for evaluating click model accuracy. It
 	Perplexity_r &= 2^{-\frac{1}{|S|} \sum_{s \in S}(c_r^{(s)} \log_2 p_r^{(s)} + (1-c_r^{(s)} ) \log_2 (1-p_r^{(s)}))} \label{eq:perplexity} \\
 	p_r^{(s)} &= P(C_r = 1 | \mathbf{M}) \nonumber
 \end{align}
-The perplexity of a data set is defined as the average of perplexities over all positions. Thus, a smaller perplexity value indicates a better consistency between the click model and the actual click data.
+The perplexity of a model is defined as the average of perplexities over all positions. Thus, a smaller perplexity value indicates a better consistency between the click model and the actual click data.
 
 \subsection{Click-Trough-Rate Prediction (CTR)}
 The purpose of click-through rates is to measure the ratio of clicks to impressions of an document.
@@ -66,15 +66,15 @@ In this set of experiments we use the predicted relevance directly to rank urls,
 \subsection{Computation Time}
 Historically in machine learning a big problem in creating accurate models was the amount of data that was available. However this is no longer the case, we are mostly restricted by the time that it takes to learn a model from the large amount of data that we currently have. So an important feature of a succesful click model is that it should be able to efficiently compute its parameters. Therefore, we also decided to look at the computation time it takes to train the click models.
 
-\fix{TODO: Add some info about machine it is run on???}
+\fixme{TODO: Add some info about machine it is run on???}
 
 \section{Experiments}
 In this section we report on the experimental evaluation and comparison of the click models in Section~\ref{sec:methodology} on the evaluation metrics in Section~\ref{sec:evaluation} evaluated on the first 1 million query sessions from the Yandex Relevance Prediction contest of 2011 \ref{YandexData}. The rest of this section will elaborate on the experiments we have done and the results we found. We will also show how query frequency improves the performance of the models. Moreover, we will report on the evaluation measures in combination with click entropy.
 
 \subsection{Experimental Setup}
-The Yandex data set was used in the Yandex Relevance Prediction contest of 2011. In the experiments we have done we have used the first 1 million queries. We deliberatly have chosen to keep sessions that are without any clicks because removing them might hurt the performance of certain models, i.e. TCM because the freshness of a document can change with these sessions. These first 1 million sessions contain \fix{X} distinct queries. These queries get divided in a set of training sessions used to train the click models and a set of test sessions used in the evaluation of the models, the number of sessions in these sets have a 3 to 1 ratio. The problem with this approach in combination with the TCM model is that this removes the guarantee that the complete task is used when training or evaluating the model. We expect that this will hurt the performance of the TCM model and that the actual performance might be higher. 
+The Yandex data set was used in the Yandex Relevance Prediction contest of 2011. In the experiments we have done we have used the first 1 million queries. We deliberatly have chosen to keep sessions that are without any clicks because removing them might hurt the performance of certain models, i.e. TCM because the freshness of a document can change with these sessions. These first 1 million sessions contain \fixme{X} distinct queries. These queries get divided in a set of training sessions used to train the click models and a set of test sessions used in the evaluation of the models, the number of sessions in these sets have a 3 to 1 ratio. The problem with this approach in combination with the TCM model is that this removes the guarantee that the complete task is used when training or evaluating the model. We expect that this will hurt the performance of the TCM model and that the actual performance might be higher. 
 
-To report on the performance with regard to query frequency we have split the data into 5 parts. The distribution of these parts can be seen in Table~\ref{table:split} \fix{Add table on query splitting}. In the rest of this section with every evaluation measure we will also report on how this was influenced by the query frequency. The second factor that might influence performance that we have analyzed is the click entropy. The click entropy was also used to analyse queries in \cite{dou2008}. The formal definition is shown in Equation~\ref{eq:entropy}.
+To report on the performance with regard to query frequency we have split the data into 5 parts. The distribution of these parts can be seen in Table~\ref{table:split} \fixme{Add table on query splitting}. In the rest of this section with every evaluation measure we will also report on how this was influenced by the query frequency. The second factor that might influence performance that we have analyzed is the click entropy. The click entropy was also used to analyse queries in \cite{dou2008}. The formal definition is shown in Equation~\ref{eq:entropy}.
 \begin{align}
 	ClickEntropy(q) = \sum_{d \in \mathcal{P}(q)} - P(d|q) \log_2 P(d|q)
 \end{align}
