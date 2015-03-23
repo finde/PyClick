@@ -23,13 +23,13 @@ Click perplexity is a widely used metric for evaluating click model accuracy. It
 \end{align}
 The perplexity of a data set is defined as the average of perplexities over all positions. Thus, a smaller perplexity value indicates a better consistency between the click model and the actual click data.
 
-\subsection{Click-Trough-Rate prediction (CTR)}
+\subsection{Click-Trough-Rate Prediction (CTR)}
 The purpose of click-through rates is to measure the ratio of clicks to impressions of an document.
 Generally the higher the CTR the higher chance of that document being clicked.
 The click-through rate of a document $d$ is defined as:
-\begin{align*}
+\begin{align}
 	CTR_d = \frac{1}{|S_d|} \sum_{s_d} c_{r_d}^{(s_d)}
-\end{align*}
+\end{align}
 where $S_d$ is the set of sessions where document $d$ appears.
 A way to use this as an evaluation measure is proposed in \cite[p. 4]{Chapelle2009}. In the same way we calculate the CTR prediction using the following protocol:
 \begin{enumerate}
@@ -44,14 +44,14 @@ A way to use this as an evaluation measure is proposed in \cite[p. 4]{Chapelle20
 
 The error measure we use is the Root-Mean-Square-Error (RMSE).
 
-\subsection{Relevance prediction}
+\subsection{Relevance Prediction}
 Relevance prediction was used to evaluate performance of the DBN model \cite[p. 6]{Chapelle2009}.
 The accuracy of CTR prediction may not directly translate to relevance, especially when we were to evaluate the whole task instead of a single query.
 In this case, the CTR of a particular document is highly dependent on the user-model assumption.
 For example if a user tends to ignore a document that isn't fresh, CTR will be low even if the document is relevant.
 To measure relevance prediction we use a hand annotated set of relevances. We then use the Area Under the Curve (AUC) between the annotated relevances and the predicted relevances as an evaluation measure. We also measure the Pearson correlation between the two. 
 
-\subsection{Predicted relevance as a ranking feature}
+\subsection{Predicted Relevance as a Ranking Feature}
 In this set of experiments we use the predicted relevance directly to rank urls, we use the model as a ranker. To evaluate the performance of a ranker we use the Normalized Discounted Cumulative Gain (NDCG) \cite{NDCG}, for which we use a cutoff at five (NDCG@5). To calculate the NDCG@5 we only consider the documents for which we have annotated relevances. All these queries are then averaged to calculate the ranking performance of the click model. The algorithm can be seen below:
 
 \begin{enumerate}
@@ -63,26 +63,53 @@ In this set of experiments we use the predicted relevance directly to rank urls,
 	\item Average over all sessions.
 \end{enumerate}
 
-\subsection{Computation time}
+\subsection{Computation Time}
 Historically in machine learning a big problem in creating accurate models was the amount of data that was available. However this is no longer the case, we are mostly restricted by the time that it takes to learn a model from the large amount of data that we currently have. So an important feature of a succesful click model is that it should be able to efficiently compute its parameters. Therefore, we also decided to look at the computation time it takes to train the click models.
 
-\fixme{TODO: Add some info about machine it is run on???}
+\fix{TODO: Add some info about machine it is run on???}
 
 \section{Experiments}
+In this section we report on the experimental evaluation and comparison of the click models in Section~\ref{sec:methodology} on the evaluation metrics in Section~\ref{sec:evaluation} evaluated on the first 1 million query sessions from the Yandex Relevance Prediction contest of 2011 \ref{YandexData}. The rest of this section will elaborate on the experiments we have done and the results we found. We will also show how query frequency improves the performance of the models. Moreover, we will report on the evaluation measures in combination with click entropy.
 
-\subsection{Results}
+\subsection{Experimental Setup}
+The Yandex data set was used in the Yandex Relevance Prediction contest of 2011. In the experiments we have done we have used the first 1 million queries. We deliberatly have chosen to keep sessions that are without any clicks because removing them might hurt the performance of certain models, i.e. TCM because the freshness of a document can change with these sessions. These first 1 million sessions contain \fix{X} distinct queries. These queries get divided in a set of training sessions used to train the click models and a set of test sessions used in the evaluation of the models, the number of sessions in these sets have a 3 to 1 ratio. The problem with this approach in combination with the TCM model is that this removes the guarantee that the complete task is used when training or evaluating the model. We expect that this will hurt the performance of the TCM model and that the actual performance might be higher. 
+
+To report on the performance with regard to query frequency we have split the data into 5 parts. The distribution of these parts can be seen in Table~\ref{table:split} \fix{Add table on query splitting}. In the rest of this section with every evaluation measure we will also report on how this was influenced by the query frequency. The second factor that might influence performance that we have analyzed is the click entropy. The click entropy was also used to analyse queries in \cite{dou2008}. The formal definition is shown in Equation~\ref{eq:entropy}.
+\begin{align}
+	ClickEntropy(q) = \sum_{d \in \mathcal{P}(q)} - P(d|q) \log_2 P(d|q)
+\end{align}
+
+Here $ClickEntropy(q)$ is the click entropy for query $q$. $\mathcal{P}(q)$ are documents clicked on when regarding query $q$. $P(d|q)$ is the percentage of clicks on document $d$ among all clicks on $q$. If $c_{r_d}^{(q)}$ indicates a click on document $d$ in query $q$ then the click entropy is calculated as follows:
+
+\begin{align}
+	P(d|q) = \frac{\sum_p c_{r_d}^{(q)}}{\sum_{u \in \mathcal{P}(q)} c_{r_u}^{(q)}}	
+\end{align}
+
+\subsection{Results on Loglikelihood}
+In Figure \ref{fig:loglikelihood} the results of the loglikelihood experiments can be seen. 
+
+\subsection{Results on Perplexity}
+
+\subsection{Results on CTR-Prediction}
+
+\subsection{Results on Relevance Prediction}
+
+\subsection{Results Predicted Relevance as a Ranking Feature}
+
+\subsection{Results on Computation Time}
+
 In Table~\ref{table:results} one can see the results of the experiments.
 
 \begin{table}[h]
 	\begin{tabular}{@{}lllllll@{}}
 		\toprule
-		Model     & Log-likelihood     & Perplexity       & Rel. Pred. AUC & Ranking NDCG      & CTR Pred.    & Training time (sec) \\ \midrule
-		UBM       & \textbf{-0.287517} & 1.38253          & 0.699002                 & 0.875226          & 0.218453          & 10387.7                 \\
-		TCM       & -0.307072          & \textbf{1.37352} & 0.532097                 & \textbf{0.976676} & 0.233988          & 8145.77                 \\
-		SimpleDCM & -0.449973          & 1.38766          & 0.673592                 & 0.836742          & \textbf{0.210155} & 186.915                 \\
-		SimpleDBN & -0.448295          & 1.38637          & 0.668236                 & 0.740242          & \textbf{0.210155} & \textbf{161.067}        \\
-		DCM       & -0.453449          & 1.38013          & \textbf{0.706092}        & 0.825061          & 0.227854          & 18332.5                 \\
-		DBN       & -0.375291          & 1.38266          & 0.436094                 & 0.681182          & 0.23012           & 13204.2                 \\ \bottomrule
+		Model     & Log-likelihood  & Perplexity	 & Rel. Pred. AUC		 & Ranking NDCG      & CTR Pred.		 & Training time (sec) \\ \midrule
+		UBM       & \textbf{-0.288} & 1.382          & 0.699                 & 0.875			 & 0.218			 & 10387.7                 \\
+		TCM       & -0.307          & \textbf{1.374} & 0.532                 & \textbf{0.977}	 & 0.234			 & 8145.77                 \\
+		SimpleDCM & -0.450          & 1.387          & 0.674                 & 0.837             & \textbf{0.210}	 & 186.915                 \\
+		SimpleDBN & -0.448          & 1.386          & 0.668                 & 0.740             & \textbf{0.210}	 & \textbf{161.067}        \\
+		DCM       & -0.453          & 1.380          & \textbf{0.706}        & 0.825			 & 0.228			 & 18332.5                 \\
+		DBN       & -0.375          & 1.383          & 0.436                 & 0.681			 & 0.230			 & 13204.2                 \\ \bottomrule
 	\end{tabular}
 	\caption{Results}
 	\label{table:results}
