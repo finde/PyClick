@@ -18,8 +18,8 @@ To equally evaluate each click model's performance, we use evaluation metrics th
 \subsection{Perplexity}
 Click perplexity is a widely used metric for evaluating click model accuracy. It measures how surprised a model is to see $c_r^{(s)}$ under the current parameters. Perplexity is calculated for every rank individually, as to see whether some models perform better on documents higher on the SERP page then documents ranked lower on the SERP. It is used as a evaluation metric in \cite{Zhang2011} and \cite{Dupret2008}. The calculation of perplexity can be seen in Equation~\ref{eq:perplexity}.
 \begin{align}
-	Perplexity_r &= 2^{-\frac{1}{|S|} \sum_{s \in S}(c_r^{(s)} \log_2 p_r^{(s)} + (1-c_r^{(s)} ) \log_2 (1-p_r^{(s)}))} \label{eq:perplexity} \\
-	p_r^{(s)} &= P(C_r = 1 | \mathbf{M}) \nonumber
+	Perplexity_r &= 2^{-\frac{1}{|S|} \sum_{s \in S}(c_r^{(s)} \log_2 p_r + (1-c_r^{(s)} ) \log_2 (1-p_r))} \label{eq:perplexity} \\
+	p_r &= P(C_r = 1 | \mathbf{M}) \nonumber
 \end{align}
 The perplexity of a model is defined as the average of perplexities over all positions. Thus, a smaller perplexity value indicates a better consistency between the click model and the actual click data.
 
