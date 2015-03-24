@@ -23,4 +23,4 @@ This will compare the models on a Yandex Click log, for which the description is
 
 
 ## Acknowledgements
-* This project is supervised by [Ilya Markovi](http://github.com/markovi) and [Artem Grotov](http://github.com/agrotov)
+* This project is supervised by [Ilya Markov](http://github.com/markovi) and [Artem Grotov](http://github.com/agrotov)
