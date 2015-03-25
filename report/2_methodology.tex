@@ -1,91 +1,51 @@
-\section{Methodology}
+\section{Click Models}
 \label{sec:methodology}
-The different models we compare UBM, DCM, DBN and TCM on the Yandex dataset \cite{yandex}. In this section, we briefly describe their main characteristics and differences. We have implemented TCM ourselves, the other algorithms were taken from PyClick \cite{PyClick}.
+In this section, we briefly describe their main characteristics and differences. We have implemented CTR, PBM, CM, CCM, and TCM ourselves, the UBM algorithms were taken from PyClick \cite{PyClick}. To make it easier to understand the equations, we listed all general notations used in this document.
+
+\begin{table}[ht]
+	\centering
+	\begin{tabular}{l|lll|}
+		\hline
+		Symbol & Description \\
+		\hline
+		(\(u\),\(q\)) 	& document $u$ - query $q$ pair)\\
+		$ A $ & Attractiveness variable \\
+		$ \alpha $ & Attractiveness parameter \\
+		$ S $ & Satisfaction variable \\
+		$ \sigma $ & Satisfaction parameter \\
+		$ E $ & Examination variable \\
+		$ \epsilon $ & Examination parameter \\
+		$ R $ & Relevancy variable \\
+		$ r $ & Relevancy parameter \\
+		$ C $ & Click variable \\
+		$ c $ & actual click\\
+		\hline
+	\end{tabular}
+	\caption{Notations used in the equations}
+	\label{table:tcm_notations}
+\end{table}
 
 \subsection{Click-through rate click model}
-The most simple click model, abbreviated as CTR, that actually tries to predict relevance for a query-documenent pair. The relevance is the only parameter in this model. The relevance in this model is simple defined as $a_u = \frac{\#\,of\,clicks}{\#\,of\,times\,shown}$. We included this model as a simple baseline that the models should improve upon.
+The most simple click model, click-through rate (CTR), tries to predict relevance for a query-document pair. Relevance is the only parameter in this model which is the click-through rate formula. The inference is done by using maximum likelihood estimation (MLE) because there is no latent variables in this model. Therefore, the click probability of document at position $u$ will be:
+\begin{align}
+	P(C_{u}=1) &= \frac{1}{|S_{uq}|} \sum_{s \in S_{uq}} c_{uq}\\
+	\text{where}&, S_{uq} = \{ s_q : u \in s_q \} \nonumber
+\end{align}
 
 \subsection{Position based model}
-This model builds upon the CTR model. It adds a \texttt{position bias} where documents in a higher position are examined more often. A document can only be clicked if it was examined. The values for this position bias are taken from \cite{eye_track} and are $[.68, .61, .48, .34, .28, .2, .11, .1, .08, .06]$.
+This model builds upon the CTR model. It adds a \texttt{position bias} where documents in a higher position are examined more often. A document can only be clicked if it was examined. The values for this position bias are taken from \cite{eye_track} and are $[.68, .61, .48, .34, .28, .2, .11, .1, .08, .06]$. Inference of this model is done by using expectation-maximization (EM)
+\begin{align}
+	P(C_{u}=1|E_{u}) &= 
+\end{align}
+
+\fixme{Equations and Inference}
 
 \subsection{Cascade model}
-Cascade model assumes that users abandon the query session after the first click and hence does not provide a complete picture of how multiple clicks arise in a query session and how to estimate document relevance from such data \cite{Kempe2008, Craswell2008}. 
-This model also assume that the user views search results from top to bottom, deciding whether to click each result before moving to the next. 
-To observe a click, the user must have decided both to click and skip the ranks above.
+Cascade model assumes that users abandon a search session after the first click and hence does not provide a complete picture of how multiple clicks arise in a query session and how to estimate document relevance from such data \cite{Kempe2008, Craswell2008}. 
+This model also assumes that a user examines search results from top to bottom, deciding whether to click each result before moving to the next. 
+To make a click, the user must have decided both to click and skip the ranks above.
 
-\subsection{Dependent Click Model}
-The dependent click model was first proposed by Guo et al. in \cite{Guo2009_DCM}. In the paper they propose a new click model which can handle multiple clicks per query by introducing a position dependent parameter $lambda_j$ to reflect the chance that the user would like to see more results after a click at position $j$. A graphical representation of the model is presented in Figure\ref{fig:dcm_gm} 
-
-\subsection{Dynamic Bayesion Network}
-The dynamic bayesian network click model is an extension to the traditional cascade model proposed by Chapelle and Zhang in \cite{Zhang2011}. For a given position $j$, in addition to observed variable $C_j$ indicating whether there was a click or not at this position, the following latent variable are defined to model examination, perceived relevance and actual relevance, respectedly:
-\begin{itemize}
-	\item $E_j$: Did the user $examine$ the document?
-	\item $A_j$: Was the user $attracted$ by the document?
-	\item $S_j$: Was the user $satisfied$ by the clicked document?
-\end{itemize}
-They introduce a variable $s_u$ for each document $u$ which describes the relevance of the document for this query. When the user clicks on this document, there is a certain chance that the user will be satisfied. If the user is not satisfied, he continues to examine the next document with a probability $\gamma$ and stops otherwise. The parameter $\gamma$ is known as the 'perseverance'. A graphical representation of the model is presented in Figure \ref{fig:dbn_gm}. 
-
-\begin{figure}[ht]
-	\begin{subfigure}[b]{.45\textwidth}
-		\centering
-		\begin{tikzpicture}
-		
-		% Define nodes
-		\node[obs, minimum size=1cm]                      				(c) {$C_j$};
-		\node[latent, left=.6cm of c, yshift=-.8cm, minimum size=1cm]  	(a) {$A_j$};
-		\node[latent, right=.6cm of c, yshift=-.8cm, minimum size=1cm]  (s) {$S_j$};
-		
-		\node[latent, above=.6cm of c, minimum size=1cm]  				(e) {$E_j$};
-		\node[latent, left=.6cm of e, minimum size=1cm]  				(e_m_1) {$E_{j-1}$};
-		\node[latent, right=.6cm of e, minimum size=1cm]  				(e_p_1) {$E_{j+1}$};
-		
-		% Connect the nodes
-		\edge {a,e} {c} ; %
-		\edge {c} {s} ; %
-		\edge {e_m_1} {e} ; %
-		\edge {e, s} {e_p_1} ; %
-		
-		% Plates
-		\plate [inner sep=.3cm, text centered] {u_r} {(a)(c)(e)(s)(e_m_1)(e_p_1)} {document $u_j$};
-		
-		\end{tikzpicture}
-		\caption{DCM}	
-		\label{fig:dcm_gm}
-	\end{subfigure}
-	\begin{subfigure}[b]{.45\textwidth}
-		\centering
-		\begin{tikzpicture}
-		
-		% Define nodes
-		\node[obs, minimum size=1cm]                      				(c) {$C_j$};
-		\node[latent, left=.6cm of c, yshift=-.8cm, minimum size=1cm]  	(a) {$A_j$};
-		\node[latent, right=.6cm of c, yshift=-.8cm, minimum size=1cm]  (s) {$S_j$};
-		
-		\node[latent, above=.6cm of c, minimum size=1cm]  				(e) {$E_j$};
-		\node[latent, left=.6cm of e, minimum size=1cm]  				(e_m_1) {$E_{j-1}$};
-		\node[latent, right=.6cm of e, minimum size=1cm]  				(e_p_1) {$E_{j+1}$};
-		
-		\node[const, left=1cm of a]  									(a_u) {$\alpha_u$};
-		\node[const, right=1cm of s] 									(s_u) {$s_u$};
-		
-		% Connect the nodes
-		\edge {a,e} {c} ; %
-		\edge {c} {s} ; %
-		\edge {e_m_1} {e} ; %
-		\edge {e} {e_p_1} ; %
-		\edge {s} {e_p_1} ; %
-		\edge {a_u} {a} ; %
-		\edge {s_u} {s} ; %
-		
-		% Plates
-		\plate [inner sep=.3cm, text centered] {u_r} {(a)(c)(e)(s)(e_m_1)(e_p_1)} {document $u_j$};
-		
-		\end{tikzpicture}
-		\caption{DBN}
-		\label{fig:dbn_gm}
-	\end{subfigure}
-	\caption{The graphical model of DCM and DBN.}
-\end{figure}
+\fixme{Equations and Inference}
 
 \subsection{User Browsing Model}
 In \cite{Dupret2008}, Dupret and Piwowarski propose a new click model called the User Browsing Model (UBM). The main difference between UBM and other models is that UBM takes the distance into account from the current document \(u_j\) to the last clicked document \(u_{j'}\) for determining the probability that the user continues browsing:
