@@ -1,6 +1,6 @@
 \section{Click Models}
 \label{sec:methodology}
-In this section, we briefly describe their main characteristics and differences. We have implemented CTR, PBM, CM, CCM, and TCM ourselves, the UBM algorithms were taken from PyClick \cite{PyClick}. To make it easier to understand the equations, we listed all general notations used in this document.
+In this section, we briefly describe their main characteristics and differences. We have implemented CTR, PBM, CM, CCM, and TCM ourselves, the UBM algorithm is taken from PyClick \cite{PyClick}. The general notation used in this report will be as follows:
 
 \begin{table}[ht]
 	\centering
@@ -8,50 +8,53 @@ In this section, we briefly describe their main characteristics and differences.
 		\hline
 		Symbol & Description \\
 		\hline
-		(\(u\),\(q\)) 	& document $u$ - query $q$ pair)\\
+		$u$	& Document $u$ \\
+		$q$	& Query $q$ \\
 		$ A $ & Attractiveness variable \\
 		$ \alpha $ & Attractiveness parameter \\
 		$ S $ & Satisfaction variable \\
 		$ \sigma $ & Satisfaction parameter \\
 		$ E $ & Examination variable \\
 		$ \epsilon $ & Examination parameter \\
-		$ R $ & Relevancy variable \\
-		$ r $ & Relevancy parameter \\
+		$ R $ & Relevance variable \\
+		$ r $ & Relevance parameter \\
 		$ C $ & Click variable \\
-		$ c $ & actual click\\
+		$ c $ & Actual click \\
+		$ \mathcal{S} $ & All sessions \\
+		$ s $ & A query session \\
+		$ j $ & Position within a query session \\
 		\hline
 	\end{tabular}
 	\caption{Notations used in the equations}
-	\label{table:tcm_notations}
+	\label{table:notations}
 \end{table}
 
-\subsection{Click-through rate click model}
-The most simple click model, click-through rate (CTR), tries to predict relevance for a query-document pair. Relevance is the only parameter in this model which is the click-through rate formula. The inference is done by using maximum likelihood estimation (MLE) because there is no latent variables in this model. Therefore, the click probability of document at position $u$ will be:
+\subsection{Click-through Rate click model}
+The most simple click model, Click-Through Rate (CTR), tries to predict relevance for a query-document pair. Relevance is the only parameter in this model which is the click-through rate formula. The inference is done by using maximum likelihood estimation (MLE) because there are no latent variables in this model. Therefore, the click probability of document at position $u$ will be:
 \begin{align}
-	P(C_{u}=1) &= \frac{1}{|S_{uq}|} \sum_{s \in S_{uq}} c_{uq}\\
+	P(C_{u}=1) &= P(R_u=1) \nonumber \\
+	P(R_{u}=1) &= \frac{1}{|S_{uq}|} \sum_{s \in S_{uq}} c_{uq} \label{eq:ctr_rel}\\
 	\text{where}&, S_{uq} = \{ s_q : u \in s_q \} \nonumber
 \end{align}
 
 \subsection{Position based model}
-This model builds upon the CTR model. It adds a \texttt{position bias} where documents in a higher position are examined more often. A document can only be clicked if it was examined. The values for this position bias are taken from \cite{eye_track} and are $[.68, .61, .48, .34, .28, .2, .11, .1, .08, .06]$. Inference of this model is done by using expectation-maximization (EM)
+This model builds upon the CTR model. It adds a \texttt{position bias} where documents in a higher position are examined more often. A document can only be clicked if it was examined. The click probability of a document $u$ is as is defined in Equation~\ref{eq:PBM_click} where $P(R_u=1)$ is defined as in Equation~\ref{eq:ctr_rel}. The values of $P(E_r=1)$ will be fixed. They are taken from \cite{eye_track} and are $[.68, .61, .48, .34, .28, .2, .11, .1, .08, .06]$. Inference of this model is done by using expectation-maximization (EM)
 \begin{align}
-	P(C_{u}=1|E_{u}) &= 
+	P(C_{u}=1) &= P(E_{r_u}=1)P(R_u=1) \label{eq:PBM_click}
 \end{align}
 
-\fixme{Equations and Inference}
-
 \subsection{Cascade model}
-Cascade model assumes that users abandon a search session after the first click and hence does not provide a complete picture of how multiple clicks arise in a query session and how to estimate document relevance from such data \cite{Kempe2008, Craswell2008}. 
-This model also assumes that a user examines search results from top to bottom, deciding whether to click each result before moving to the next. 
-To make a click, the user must have decided both to click and skip the ranks above.
-
-\fixme{Equations and Inference}
+Cascade model is another extension to the CTR model. It assumes that users abandon a search session after the first click and hence does not provide a complete picture of how multiple clicks arise in a query session and how to estimate document relevance from such data \cite{Kempe2008, Craswell2008}. This model introduces the \textit{cascade hypothesis}, a used examines a search result page (SERP) from top to bottom, deciding whether to click each result before moving to the next. This means ofcourse that to make a click, the user must have decided both to click and skip the ranks above. The relevance of a document is calculated in the same way as in Equation~\ref{eq:ctr_rel}. The click probability is defined as:
+\begin{align}
+	P(C_{u}=1) &= P(E_{r_u}=1)P(R_u=1) \label{eq:CM_click} \\
+	P(E_{r_u}=1) &= \prod_{j=1}^{r_u-1} 1 - P(C_{j_u}=1) \nonumber
+\end{align}
+The inference of the parameters of CM is done using MLE-inference.
 
 \subsection{User Browsing Model}
 In \cite{Dupret2008}, Dupret and Piwowarski propose a new click model called the User Browsing Model (UBM). The main difference between UBM and other models is that UBM takes the distance into account from the current document \(u_j\) to the last clicked document \(u_{j'}\) for determining the probability that the user continues browsing:
 \[P(E_j =1 \mid C_{j'}=1, C_{j'+1}=0, \dots, C_{j-1}=0) = \gamma_{jj'}\]
-The probability that a document at rank \(j\) is examined \(E_j\) therefore depends on all possible paths the user could have taken to arrive at this document:
-\[P(E_j = 1) = \sum_{j'=1}^{j-1} \gamma_{jj'}\]
+
 A graphical representation of the model is presented in Figure~\ref{fig:ubm_gm}.
 
 \begin{figure}[ht!]
@@ -79,26 +82,29 @@ A graphical representation of the model is presented in Figure~\ref{fig:ubm_gm}.
 			\end{tikzpicture}
 		\end{tabular}
 	\end{center}
-	\caption{The graphical model of UBM.}	
+	\caption{The graphical model of UBM. \fixme{PLACE THIS SIDE BY SIDE WITH CCM}}	
 	\label{fig:ubm_gm}
 \end{figure}
 
 \subsection{Click Chain Model}
 In \cite{Guo2009_CCM}, Fan Guo et al, proposed a bayesian based click model which was based on position bias assumption, named Click chain model (CCM). 
-CCM shares the following assumptions with the cascade model and DCM: 
-(1) users are homogeneous: their information needs are similar given the same query; 
-(2) decoupled examination and click events: click probability is solely determined by the examination probability and the document relevance at a given position; 
-(3) cascade examination: examination is in strictly sequential order with no breaks.
+CCM has the following assumptions, some of which are shared with the cascade model.
+\begin{enumerate}
+	\item Users are homogeneous: their information needs are similar given the same query; 
+	\item Decoupled examination and click events: click probability is solely determined by the examination probability and the document relevance at a given position; 
+	\item Cascade hypothesis: examination is in strictly sequential order with no breaks.
+\end{enumerate}
 
-
-This model can be formalized with the following conditional probabilities in which $R_j$ is the relevance variable of document $u$ at position $j$, $E_j$ is the examination variable, and $\alpha$’s form the set of user behavior parameters:
+The intuition behind CCM is that the chance that a user continues after a click depends on the relevance of the previous document and that a user might abandonthe search after a while. This model can be formalized with the following conditional probabilities in which $R_j$ is the relevance variable of document $u$ at position $j$, $E_j$ is the examination variable, and $\alpha$’s form the set of user behavior parameters:
 \begin{align}
-P(C_j=1|E_j=0) &= 0 \\
-P(C_j=1|E_j=1, R_j) &= R_j \\
-P(E_{j+1}=1|E_j=0) &= 0 \\
-P(E_{j+1}=1|E_j=1,C_j=0) &= \alpha_1 \\
-P(E_{j+1}=1|E_j=1,C_j=1,R_j) &= \alpha_2(1-R_j)+\alpha_3 R_j \\
+	P(C_j=1|E_j=0) &= 0 \nonumber\\
+	P(C_j=1|E_j=1, R_j) &= R_j \nonumber\\
+	P(E_{j+1}=1|E_j=0) &= 0 \nonumber\\
+	P(E_{j+1}=1|E_j=1,C_j=0) &= \tau_1 \nonumber\\
+	P(E_{j+1}=1|E_j=1,C_j=1,R_j) &= \tau_2(1-R_j)+\tau_3 R_j \label{eq:ccm_simplified}\\
 \end{align}
+
+As $\tau_2$ and $\tau_3$ are only used in Equation~\ref{eq:ccm_simplified} and in cojunction with eachother and the relevance of the previous document we have decided to combine them into one parameter, $\tau_{click}$ and $\tau_1$ has been renamed to $\tau_{no\_click}$.
 
 A graphical representation of the model is presented in Figure~\ref{fig:ccm_gm}.
 
@@ -133,13 +139,13 @@ A graphical representation of the model is presented in Figure~\ref{fig:ccm_gm}.
 			\end{tikzpicture}
 		\end{tabular}
 	\end{center}
-	\caption{The graphical model of CCM.}	
+	\caption{The graphical model of CCM. \fixme{PLACE THIS SIDE BY SIDE WITH UBM}}	
 	\label{fig:ccm_gm}
 \end{figure}
 
 \subsection{Task-centric Click Model}
 \label{sec:methodology_tcm}
-The Task-centric Click Model (TCM) was first proposed by Zhang et al. in \cite{Zhang2011}. In the paper they propose a new click model which can handle multiple clicks of multiple queries in a task by introducing two new biases. The first bias indicates that users tend to express their information needs incrementally in a task, thus perform more clicks as their needs become clearer. The other bias indicates that users tend to click fresh documents that are not included in the results of previous queries. In their paper, they named the first assumption as \texttt{query bias}, and the second assumption as \texttt{duplicate bias}. A graphical representation of the state-of-the-art of the model is presented in Figure\ref{fig:dcm_gm} and the notations used in TCM are described in Table\ref{table:tcm_notations}. 
+The Task-centric Click Model (TCM) was first proposed by Zhang et al. in \cite{Zhang2011}. In the paper they propose a new click model which can handle multiple clicks of multiple queries in a task by introducing two new biases. The first bias indicates that users tend to express their information needs incrementally in a task, thus perform more clicks as their needs become clearer. The other bias indicates that users tend to click fresh documents that are not included in the results of previous queries. In their paper, they named the first assumption as \texttt{query bias}, and the second assumption as \texttt{duplicate bias}. A graphical representation of the state-of-the-art of the model is presented in Figure~\ref{fig:dcm_gm} and the notations used in TCM are described in Table~\ref{table:tcm_notations}. 
 
 \begin{table}[ht]
 	\centering
@@ -147,16 +153,13 @@ The Task-centric Click Model (TCM) was first proposed by Zhang et al. in \cite{Z
 		\hline
 		Symbol & Description \\
 		\hline
-		(\(i\),\(j\)) 	& \(j\)-th ranking position in \(i\)-th query session.\\
-		$M_i$			& Whether the \(i\)-th query matches the user's intent.\\
-		$N_i$ 			& Whether the the user submits another query after \(i\)-th query session.\\		
-		$E_{i,j}$ 		& Examination of the document at (\(i\),\(j\)).\\
-		$H_{i,j}$ 		& Previous Examination of the document at (\(i\),\(j\)).\\
-		$F_{i,j}$ 		& Freshness of the document at (\(i\),\(j\)).\\
-		$R_{i,j}$ 		& Relevance of the document at (\(i\),\(j\)).\\
-		$C_{i,j}$ 		& Whether the the document at (\(i\),\(j\)) is clicked.\\
-		(\(i'\),\(j'\)) & Assume that \(d\) is the document at (\(i\),\(j\)).\\
-		&\(i'\) is the latest query session where \(d\) has appeared in previous query sessions,\\ &and \(j'\) is the ranking position of this appearance.\\
+		$M_q$			& Whether the query $q$ matches the user's intent.\\
+		$N_q$ 			& Whether the the user submits another query after \(i\)-th query session.\\		
+		$E_{uq}$ 		& Examination of the document at (\(i\),\(j\)).\\
+		$H_{uq}$ 		& Previous Examination of the document at (\(i\),\(j\)).\\
+		$F_{uq}$ 		& Freshness of the document at (\(i\),\(j\)).\\
+		(\(u'\),\(q'\)) & Assume that \(d\) is the document at (\(i\),\(j\)).\\
+		&\(q'\) is the latest query session where \(u\) has appeared in previous query sessions \\
 		\hline
 	\end{tabular}
 	\caption{Notations used in TCM}
@@ -165,22 +168,22 @@ The Task-centric Click Model (TCM) was first proposed by Zhang et al. in \cite{Z
 
 This model can be formalized with the following conditional probabilities:
 \begin{align}
-	P(M_i=1) &= \alpha_1 \\
+	P(M_q=1) &= \tau_1 \\
 	\label{eq:alpha_2}
-	P(N_i|M_i=1) &= \alpha_2 \\
-	P(F_{i,j}=1|M_{i,j}=1) &= \alpha_3 \\
-	P(E_{i,j}=1) &= \beta_j \\
-	P(R_{i,j}=1) &= r_d \\
-	M_i = 0 &\Rightarrow N_i = 1\\
-	H_{i,j} = 0 &\Rightarrow F_{i,j} = 1\\
-	H_{i,j} = 0 &\Leftrightarrow H_{i',j'} = 0, E_{i',j'} = 0\\
-	C_{i,j} = 1 &\Leftrightarrow M_i = 1, E_{i,j} = 1, R_{i,j} = 1, F_{i,j} = 1
+	P(N_q|M_q=1) &= \tau_2 \\
+	P(F_{uq}=1|M_{uq}=1) &= \tau_3 \\
+	P(E_{uq}=1) &= \epsilon_j \\
+	P(R_{uq}=1) &= r_u \\
+	M_q = 0 &\Rightarrow N_i = 1\\
+	H_{uq} = 0 &\Rightarrow F_{uq} = 1\\
+	H_{uq} = 0 &\Leftrightarrow H_{u',q'} = 0, E_{u',q'} = 0\\
+	C_{uq} = 1 &\Leftrightarrow M_q = 1, E_{uq} = 1, R_{uq} = 1, F_{uq} = 1
 \end{align}
 
-In our implementation, we simplified TCM model by assuming that $M_i$ is observed from the click log data, thus eq.\ref{eq:alpha_2} can be removed.
-Our second assumptions is that $M_i, E_{i,j},R_{i,j}$ and $F_{i,j}$ are independent.
-The detail calculation for updating EM parameters of the simplified TCM can be found in the appendices section.
-The graphical model of our TCM implementation is presented in Fig \ref{fig:tcm_gm_new}.
+In our implementation, we simplified TCM model by assuming that a query matches a users intent ($M_q$) is observed from the click log data, if a user clicks in a result in a query then that query matched the users intent. thus eq.\ref{eq:alpha_2} can be removed. 
+Our second assumption is that $M_q, E_{uq},R_{uq}$ and $F_{uq}$ are independent. 
+The detailed calculation for updating EM parameters of the simplified TCM can be found in the appendix.
+The graphical model of our TCM implementation is presented in Figure~\ref{fig:tcm_gm_new}.
 
 \begin{figure}[ht]
 	\begin{subfigure}[b]{.45\textwidth}
@@ -188,15 +191,15 @@ The graphical model of our TCM implementation is presented in Fig \ref{fig:tcm_g
 		\begin{tikzpicture}
 		
 		% Define nodes
-		\node[obs]                      (n) {$N_i$};
-		\node[latent, left=1.2cm of n]  (m) {$M_i$};
-		\node[obs, below=0.6cm of n]    (c) {$C_i$};
-		\node[latent, left=1.2cm of c]  (e) {$E_{i,j}$};
-		\node[latent, right=1.2cm of c] (r) {$R_{i,j}$};
-		\node[latent, below=0.6cm of c] (f) {$F_{i,j}$};
-		\node[latent, left=1.2cm of f]  (h) {$H_{i,j}$};
-		\node[latent, left=1.2cm of h]  (h_prime) {$H_{i,j}'$};
-		\node[latent, left=1.2cm of h, yshift=1.2cm]  (e_prime) {$E_{i,j}'$};
+		\node[obs]                      (n) {$N_q$};
+		\node[latent, left=1.2cm of n]  (m) {$M_q$};
+		\node[obs, below=0.6cm of n]    (c) {$C_{uq}$};
+		\node[latent, left=1.2cm of c]  (e) {$E_{uq}$};
+		\node[latent, right=1.2cm of c] (r) {$R_{uq}$};
+		\node[latent, below=0.6cm of c] (f) {$F_{uq}$};
+		\node[latent, left=1.2cm of f]  (h) {$H_{uq}$};
+		\node[latent, left=1.2cm of h]  (h_prime) {$H_{uq}'$};
+		\node[latent, left=1.2cm of h, yshift=1.2cm]  (e_prime) {$E_{uq}'$};
 		
 		% Connect the nodes
 		\edge {m} {n,c} ; %
@@ -209,7 +212,7 @@ The graphical model of our TCM implementation is presented in Fig \ref{fig:tcm_g
 		\plate [inner sep=.3cm] {p_m} {(m)(n)(p_n)} {$i=1,\dots,m$} ;
 		
 		\end{tikzpicture}
-		\caption{state-of-the-art TCM.}
+		\caption{State-of-the-art TCM}
 		\label{fig:tcm_gm}
 	\end{subfigure}
 	\hfill
@@ -218,14 +221,14 @@ The graphical model of our TCM implementation is presented in Fig \ref{fig:tcm_g
 		\begin{tikzpicture}
 	
 		% Define nodes
-		\node[obs]					  (c) {$C_i$};
+		\node[obs]					  (c) {$C_{uq}$};
 		\node[obs, left=1.2cm of n, yshift=1.4cm]  (m) {$M_i$};
-		\node[latent, left=1.2cm of c]  (e) {$E_{i,j}$};
-		\node[latent, right=1.2cm of c] (r) {$R_{i,j}$};
-		\node[latent, below=0.6cm of c] (f) {$F_{i,j}$};
-		\node[latent, left=1.2cm of f]  (h) {$H_{i,j}$};
-		\node[latent, left=1.2cm of h]  (h_prime) {$H_{i,j}'$};
-		\node[latent, left=1.2cm of h, yshift=1.2cm]  (e_prime) {$E_{i,j}'$};
+		\node[latent, left=1.2cm of c]  (e) {$E_{uq}$};
+		\node[latent, right=1.2cm of c] (r) {$R_{uq}$};
+		\node[latent, below=0.6cm of c] (f) {$F_{uq}$};
+		\node[latent, left=1.2cm of f]  (h) {$H_{uq}$};
+		\node[latent, left=1.2cm of h]  (h_prime) {$H_{uq}'$};
+		\node[latent, left=1.2cm of h, yshift=1.2cm]  (e_prime) {$E_{uq}'$};
 		
 		% Connect the nodes
 		\edge {m} {n,c} ; %
@@ -239,10 +242,8 @@ The graphical model of our TCM implementation is presented in Fig \ref{fig:tcm_g
 		
 		\end{tikzpicture}
 		
-		\caption{simplified TCM}
+		\caption{\Simplified TCM}
 		\label{fig:tcm_gm_new}
 	\end{subfigure}
-	
-	
 	\caption{The graphical model of state-of-the-art TCM and simplified TCM.}
 \end{figure}

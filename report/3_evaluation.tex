@@ -74,19 +74,16 @@ In this section we report on the experimental evaluation and comparison of the c
 \subsection{Experimental Setup}
 The Yandex data set was used in the Yandex Relevance Prediction contest of 2011. In the experiments we have done we have used the first 1 million queries. We deliberatly have chosen to keep sessions that are without any clicks because removing them might hurt the performance of certain models, i.e. TCM because the freshness of a document can change with these sessions. These first 1 million sessions contain \fixme{X} distinct queries. These queries get divided in a set of training sessions used to train the click models and a set of test sessions used in the evaluation of the models, the number of sessions in these sets have a 3 to 1 ratio. The problem with this approach in combination with the TCM model is that this removes the guarantee that the complete task is used when training or evaluating the model. We expect that this will hurt the performance of the TCM model and that the actual performance might be higher. 
 
-To report on the performance with regard to query frequency we have split the data into 5 parts. The distribution of these parts can be seen in Table~\ref{table:split} \fixme{Add table on query splitting}. In the rest of this section with every evaluation measure we will also report on how this was influenced by the query frequency. The second factor that might influence performance that we have analyzed is the click entropy. The click entropy was also used to analyse queries in \cite{dou2008}. The formal definition is shown in Equation~\ref{eq:entropy}.
+To report on the performance with regard to query frequency we have split the data into 4 parts. The distribution of these parts can be seen in Table~\ref{table:query_split} \fixme{Add table on query splitting}. In the rest of this section with every evaluation measure we will also report on how this was influenced by the query frequency. The second factor that might influence performance that we have analyzed is the click entropy. The click entropy was also used to analyse queries in \cite{dou2008}. The formal definition is shown in Equation~\ref{eq:entropy}.
 \begin{align}
-	ClickEntropy(q) = \sum_{d \in \mathcal{P}(q)} - P(d|q) \log_2 P(d|q)
+	ClickEntropy(q) &= \sum_{d \in \mathcal{P}(q)} - P(d|q) \log_2 P(d|q) \label{eq:entropy} \\
+	P(d|q) &= \frac{\sum_p c_{r_d}^{(q)}}{\sum_{u \in \mathcal{P}(q)} c_{r_u}^{(q)}} \label{eq:entropy_2}
 \end{align}
 
-Here $ClickEntropy(q)$ is the click entropy for query $q$. $\mathcal{P}(q)$ are documents clicked on when regarding query $q$. $P(d|q)$ is the percentage of clicks on document $d$ among all clicks on $q$. If $c_{r_d}^{(q)}$ indicates a click on document $d$ in query $q$ then the click entropy is calculated as follows:
-
-\begin{align}
-	P(d|q) = \frac{\sum_p c_{r_d}^{(q)}}{\sum_{u \in \mathcal{P}(q)} c_{r_u}^{(q)}}	
-\end{align}
+Here $ClickEntropy(q)$ is the click entropy for query $q$. $\mathcal{P}(q)$ are documents clicked on when regarding query $q$. $P(d|q)$ is the percentage of clicks on document $d$ among all clicks on $q$. The search sessions have been divided into 3 parts with respect to click entropy and the evaluation measures have been tested on these parts. Statistics of these parts can be seen in Table~\ref{table:entropy_split}.
 
 \subsection{Results on Loglikelihood}
-In Figure \ref{fig:loglikelihood} the results of the loglikelihood experiments can be seen. 
+In Figure \ref{fig:loglikelihood} the results of the loglikelihood experiments can be seen.
 
 \subsection{Results on Perplexity}
 
