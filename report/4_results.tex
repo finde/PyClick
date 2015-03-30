@@ -1,0 +1,31 @@
+\subsection{Results}
+
+\subsubsection{Results on Loglikelihood}
+In Figure \ref{fig:loglikelihood} the results of the loglikelihood experiments can be seen.
+
+\subsubsection{Results on Perplexity}
+
+\subsubsection{Results on CTR-Prediction}
+
+\subsubsection{Results on Relevance Prediction}
+
+\subsubsection{Results Predicted Relevance as a Ranking Feature}
+
+\subsubsection{Results on Computation Time}
+
+In Table~\ref{table:results} one can see the results of the experiments.
+
+\begin{table}[h]
+	\begin{tabular}{@{}lllllll@{}}
+		\toprule
+		Model     & Log-likelihood  & Perplexity	 & Rel. Pred. AUC		 & Ranking NDCG      & CTR Pred.		 & Training time (sec) \\ \midrule
+		UBM       & \textbf{-0.288} & 1.382          & 0.699                 & 0.875			 & 0.218			 & 10387.7                 \\
+		TCM       & -0.307          & \textbf{1.374} & 0.532                 & \textbf{0.977}	 & 0.234			 & 8145.77                 \\
+		SimpleDCM & -0.450          & 1.387          & 0.674                 & 0.837             & \textbf{0.210}	 & 186.915                 \\
+		SimpleDBN & -0.448          & 1.386          & 0.668                 & 0.740             & \textbf{0.210}	 & \textbf{161.067}        \\
+		DCM       & -0.453          & 1.380          & \textbf{0.706}        & 0.825			 & 0.228			 & 18332.5                 \\
+		DBN       & -0.375          & 1.383          & 0.436                 & 0.681			 & 0.230			 & 13204.2                 \\ \bottomrule
+	\end{tabular}
+	\caption{Results}
+	\label{table:results}
+\end{table}
