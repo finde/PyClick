@@ -30,19 +30,20 @@ Here $ClickEntropy(q)$ is the click entropy for query $q$. $\mathcal{P}(q)$ are 
 \begin{table}
 \centering
 \begin{tabular}{|l|l|}
+\hline
 Click entropy & Number of sessions \\ \hline
 0 - 1         & 509062             \\ \hline
 1+ - 2        & 154672             \\ \hline
 2+            & 336266             \\ \hline
 \end{tabular}
 \caption{The distribution of session with respect to click entropy}
-\label{table:entropy_split}
 \end{table}
 
 \subsection{Results}
+In this section we outline the results of the experiments. For every evaluation measure the influence of the query frequency and click entropy can be seen. Table~\ref{table:results} contains the values of the evaluation measures for every model when trained on the entire dataset.
 
 \subsubsection{Results on Loglikelihood}
-In Figure \ref{fig:loglikelihood} the results of the loglikelihood experiments can be seen.
+In Figures \ref{fig:ll_qf} and \ref{fig:ll_ce} the results of the loglikelihood experiments can be seen.
 
 \subsubsection{Results on Perplexity}
 
