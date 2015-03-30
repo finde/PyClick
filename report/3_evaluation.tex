@@ -9,7 +9,7 @@ To equally evaluate each click model's performance, we use evaluation metrics th
 . The evaluation metrics used in this experiment are listed below:
 
 \subsection{Loglikelihood}
-1Loglikelihood is the default evaluation metric in machine learning. It says something about the likelihood of the data give the model. In Equation~\ref{eq:loglikelihood} the calculation of the loglikelihood of a click model and a set of sessions can be seen, where $\mathcal{L}\mathcal{L}(S|\mathbf{M})$ is the loglikelihood of the sessions given the models parameters, $S$ the set of sessions, $\mathbf{M}$ the model and its parameters, $r$ is the rank of a particular document in a session and $c_r^{(s)}$ a indicator function that is $1$ when the document at rank $r$ in session $s$ was clicked and $0$ otherwise.
+Loglikelihood is the default evaluation metric in machine learning. It says something about the likelihood of the data give the model. In Equation~\ref{eq:loglikelihood} the calculation of the loglikelihood of a click model and a set of sessions can be seen, where $\mathcal{L}\mathcal{L}(S|\mathbf{M})$ is the loglikelihood of the sessions given the models parameters, $S$ the set of sessions, $\mathbf{M}$ the model and its parameters, $r$ is the rank of a particular document in a session and $c_r^{(s)}$ a indicator function that is $1$ when the document at rank $r$ in session $s$ was clicked and $0$ otherwise.
 \begin{align}
 	\mathcal{L}\mathcal{L}(S|\mathbf{M}) = \frac{1}{|S|}\sum_{s \in S} \frac{1}{|s|} \sum_{r = 1}^{|s|} \log P(C_r=c_r^{(s)}|\mathbf{M}, C_{r-1}, C_{r-2}\dots C_1)
 	\label{eq:loglikelihood}
@@ -25,6 +25,7 @@ Click perplexity is a widely used metric for evaluating click model accuracy. It
 The perplexity of a model is defined as the average of perplexities over all positions. Thus, a smaller perplexity value indicates a better consistency between the click model and the actual click data.
 
 \subsection{Click-Trough-Rate Prediction (CTR)}
+\label{sec:ctr}
 The purpose of click-through rates is to measure the ratio of clicks to impressions of an document.
 Generally the higher the CTR the higher chance of that document being clicked.
 The click-through rate of a document $d$ is defined as:
@@ -49,7 +50,7 @@ The error measure we use is the Root-Mean-Square-Error (RMSE).
 Relevance prediction was used to evaluate performance of the DBN model \cite[p. 6]{Chapelle2009}.
 The accuracy of CTR prediction may not directly translate to relevance, especially when we were to evaluate the whole task instead of a single query.
 In this case, the CTR of a particular document is highly dependent on the user-model assumption.
-For example if a user tends to ignore a document that isn't fresh, CTR will be low even if the document is relevant.
+For example if a user tends to ignore a document that isn't fresh, the CTR will be low even if the document is relevant.
 To measure relevance prediction we use a hand annotated set of relevances. We then use the Area Under the Curve (AUC) between the annotated relevances and the predicted relevances as an evaluation measure. We also measure the Pearson correlation between the two. 
 
 \subsection{Predicted Relevance as a Ranking Feature}

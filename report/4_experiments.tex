@@ -47,22 +47,26 @@ Click entropy & Number of sessions \\ \hline
 In this section we outline the results of the experiments. For every evaluation measure the influence of the query frequency and click entropy can be seen. Table~\ref{table:results} contains the values of the evaluation measures for every model when trained on the entire dataset.
 
 \subsubsection{Loglikelihood}
-In Figures \ref{fig:ll_qf} and \ref{fig:ll_ce} the results of the loglikelihood experiments can be seen. 
+In Figures \ref{fig:ll_qf} and \ref{fig:ll_ce} the results of the loglikelihood experiments can be seen.  The Loglikelihood of the Cascade Model is not measured as the likelihood of a session with multiple clicks is undefined in that model. We see that UBM is the model that performs best when training on the whole data set and only on the queries with average click-entropy, between 1 and 2, the model is outperformed by CCM. We expected UBM to be the best model going into these experiments. Something to note is that the PBM performs well on queries that have low entropy, a sign that the examination parameters are more accurate on informational queries.
+
+Query frequency has \fixme{Fill in something about the ll\_qf graph.}
 
 \subsubsection{Perplexity}
 In Figures~\ref{fig:perp_qf} and \ref{fig:perp_ce} the influence of the query frequency and click entropy on the perplexity can be seen. 
 
-\subsubsection{CTR-Prediction}
-Figures~\ref{fig:ctr_qf} and \ref{fig:ctr_ce} show the impact of query frequency and click entropy on the CTR-prediction task. 
+In Figure~\ref{fig:perp_rank} the perplexity of different ranks can be seen. As a document has a higher rank the models perplexity gets lower. However speed with which it gets lower differs per model. TCM and PBM have a high perplexity for the lower ranks, the documents that are more often examined by the users. Whereas for high ranks they are the top performers in terms of perplexity. What this shows is that position based click models, of which our implementation of TCM is one, the examination parameter is more accurate than the ones that are inferred by other models, e.g. UBM. 
 
-\subsubsection{Prediction}
-The results of the relevance prediction task can be seen in Figures~\ref{fig:rel_qf} and~\ref{fig:rel_ce}.x
+\subsubsection{CTR-Prediction}
+Figures~\ref{fig:ctr_qf} and \ref{fig:ctr_ce} show the impact of query frequency and click entropy on the CTR-prediction task. In this task the simple models, CTR and CM, outperform the more complex ones. This is because the intuition of these models is exactly what this task has set out to measure. As seen in the explanation of this task in Section~\ref{sec:ctr} this task is designed to take away the position bias by only testing on the sessions where the document appears in the first place. However it is dissappointing that the complex models perform so much worse. This may have to do with the fact that every time the models are trained on a very small sample of the entire dataset. A consequence of this is that the other parameters, that are used by the complex models besides the relevance parameter, have little data to train on which influences the relevance parameter. Because of this we propose to change the method for calculating the CTR-prediction. By not training on one query at a time but on all queries in the same time the other parameters will train better and thus models that use EM-inference have a better chance to learn the actual relevance of a document.
+
+\subsubsection{Relevance Prediction}
+The results of the relevance prediction task can be seen in Figures~\ref{fig:rel_qf} and~\ref{fig:rel_ce}. Because of the way that the relevance prediction is calculated the results for the different splits of data are not as interesting. The models are trained only on the small subset of data and are evaluated on all query-document pairs found in the set of annotated relevances a lot of pairs are never seen before by the model. The model will then predict $0.5$, whereas the annotated relevance is always $0$ or $1$. This means that for all unseen query-document pairs the model will get a RMSE of 0.5 and the effect of document-query pairs that are seen will be negligible. When looking at the models that are trained on all the data we can see that the AUC gets lower then 0.5 this means that the predicted relevances have a negative correlation with the annotated, which is illustrated by the Pearson correlation values we found. The values that were found there were between the 0.05 and -0.05, depending on whether the AUC was above or below 0.5. The p-values that we have found were all below 0.05 and indicate that the test is statiscally significant.
 
 \subsubsection{Predicted Relevance as a Ranking Feature}
 In Figures~\ref{fig:rank_qf} and~\ref{fig:rank_ce} the results of using the predicted relevance as a ranking feature can be seen.
 
 \subsubsection{Computation time}
-In Table~\ref{table:results} we see that, as expected, the models that use MLE-inference are much faster than the models with EM-inference. These training times depend on the number of queries that the model is trained upon and the amount of parameters a model has. An interesting thing to see is that the UBM model out performs TCM and CCM by a large margin.
+In Table~\ref{table:results} we see that, as expected, the models that use MLE-inference are much faster than the models with EM-inference. These training times depend on the number of queries that the model is trained upon and the amount of parameters a model has. An interesting thing to note is that the UBM model out performs TCM and CCM by a large margin.
 
 
 
