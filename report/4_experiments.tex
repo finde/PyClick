@@ -4,7 +4,10 @@ In this section we report on the experimental evaluation and comparison of the c
 \subsection{Experimental Setup}
 The Yandex data set was used in the Yandex Relevance Prediction contest of 2011. In the experiments we have done we have used the first 1 million queries. We deliberatly have chosen to keep sessions that are without any clicks because removing them might hurt the performance of certain models, i.e. TCM because the freshness of a document can change with these sessions. These first 1 million sessions contain 450,931 distinct queries. These queries get divided into a set of training sessions used to train the click models and a set of test sessions used in the evaluation of the models, the number of sessions in these sets have a 3 to 1 ratio. The problem with this approach in combination with the TCM model is that this removes the guarantee that the complete task is used when training or evaluating the model. We expect that this will hurt the performance of the TCM model and that the actual performance might be higher. 
 
-To report on the performance with regard to query frequency we have split the data into 4 parts. The distribution of these parts can be seen in Table~\ref{table:query_split}.We see that there are a lot of queries that are only seen once, these queries are not informative for the models that only look at relevance, e.g. the CTR and CM models, however they are informative for the other models to infer other parameters than relevance. We also see that there are few queries In the rest of this section with every evaluation measure we will also report on how this was influenced by the query frequency. The second factor that might influence performance that we have analyzed is the click entropy. The click entropy was also used to analyse queries in \cite{dou2008}. The formal definition is shown in Equation~\ref{eq:entropy}.
+\subsubsection{Performance impacting factors}
+To report on the performance with regard to query frequency we have split the data into 4 parts. The distribution of these parts can be seen in Table~\ref{table:query_split}.We see that there are a lot of queries that are only seen once, these queries are not informative for the models that only look at relevance, e.g. the CTR and CM models, however they are informative for the other models to infer other parameters than relevance. We also see that there are few queries In the rest of this section with every evaluation measure we will also report on how this was influenced by the query frequency. We did this by only using the sessions for a particular group of query frequencies. This way all parameters can be optimal for these frequencies. This does raise a problem however for the query frequency bin of 6 to 19, here there are so few queries it is hard for the models to learn the correct parameters. This will have a negative effect on the performance of the models. 
+
+The second factor that might influence performance that we have analyzed is the click entropy. The click entropy was also used to analyse queries in \cite{dou2008}.The formal definition is shown in Equation~\ref{eq:entropy}.
 
 \begin{table}
 \centering
@@ -25,7 +28,8 @@ Query frequency & Number of sessions \\ \hline
 	P(d|q) &= \frac{\sum_p c_{r_d}^{(q)}}{\sum_{u \in \mathcal{P}(q)} c_{r_u}^{(q)}} \label{eq:entropy_2}
 \end{align}
 
-Here $ClickEntropy(q)$ is the click entropy for query $q$. $\mathcal{P}(q)$ are documents clicked on when regarding query $q$. $P(d|q)$ is the percentage of clicks on document $d$ among all clicks on $q$. The search sessions have been divided into 3 parts with respect to click entropy and the evaluation measures have been tested on these parts. Statistics of these parts can be seen in Table~\ref{table:entropy_split}.
+Here $ClickEntropy(q)$ is the click entropy for query $q$. $\mathcal{P}(q)$ are documents clicked on when regarding query $q$. $P(d|q)$ is the percentage of clicks on document $d$ among all clicks on $q$.  Click entropy can be used to split the data into informational and navigational queries. In navigational queries users know what they are looking for so the click entropy will be low because almost all clicks within that query will be on the same document. In a informational query the users explore different results to find the optimal one because they don't know what document they are looking for yet. This will give these queries a high click entropy.
+The search sessions have been divided into 3 parts with respect to click entropy and the evaluation measures have been tested on these parts in the same way as query frequency. Statistics of these parts can be seen in Table~\ref{table:entropy_split}.
 
 \begin{table}
 \centering
@@ -42,23 +46,29 @@ Click entropy & Number of sessions \\ \hline
 \subsection{Results}
 In this section we outline the results of the experiments. For every evaluation measure the influence of the query frequency and click entropy can be seen. Table~\ref{table:results} contains the values of the evaluation measures for every model when trained on the entire dataset.
 
-\subsubsection{Results on Loglikelihood}
-In Figures \ref{fig:ll_qf} and \ref{fig:ll_ce} the results of the loglikelihood experiments can be seen.
+\subsubsection{Loglikelihood}
+In Figures \ref{fig:ll_qf} and \ref{fig:ll_ce} the results of the loglikelihood experiments can be seen. 
 
-\subsubsection{Results on Perplexity}
+\subsubsection{Perplexity}
+In Figures~\ref{fig:perp_qf} and \ref{fig:perp_ce} the influence of the query frequency and click entropy on the perplexity can be seen. 
 
-\subsubsection{Results on CTR-Prediction}
+\subsubsection{CTR-Prediction}
+Figures~\ref{fig:ctr_qf} and \ref{fig:ctr_ce} show the impact of query frequency and click entropy on the CTR-prediction task. 
 
-\subsubsection{Results on Relevance Prediction}
+\subsubsection{Prediction}
+The results of the relevance prediction task can be seen in Figures~\ref{fig:rel_qf} and~\ref{fig:rel_ce}.
 
-\subsubsection{Results Predicted Relevance as a Ranking Feature}
+\subsubsection{Predicted Relevance as a Ranking Feature
+In Figures~\ref{fig:rank_qf} and~\ref{fig:rank_ce} the results of using the predicted relevance as a ranking feature can be seen.
 
-\subsubsection{Results on Computation Time}
+\subsubsection{Computation time}
+In Table~\ref{table:results} we see that, as expected, the models that use MLE-inference are much faster than the models with EM-inference. These training times depend on the number of queries that the model is trained upon and the amount of parameters a model has. An interesting thing to see is that the UBM model out performs TCM and CCM by a large margin.
 
-In Table~\ref{table:results} one can see the results of the experiments.
+
 
 \begin{table}[h]
-	\begin{tabular}{@{}lllllll@{}}
+	\centering
+	\begin{tabular}{@{}lcccccc@{}}
 		\toprule
 		Model     & Log-likelihood  & Perplexity	 & Rel. Pred. AUC		 & Ranking NDCG      & CTR Pred.		 & Training time (sec) \\ \midrule
 		UBM       & \textbf{-0.288} & 1.382          & 0.699                 & 0.875			 & 0.218			 & 10387.7                 \\

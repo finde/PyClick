@@ -11,7 +11,7 @@ To equally evaluate each click model's performance, we use evaluation metrics th
 \subsection{Loglikelihood}
 1Loglikelihood is the default evaluation metric in machine learning. It says something about the likelihood of the data give the model. In Equation~\ref{eq:loglikelihood} the calculation of the loglikelihood of a click model and a set of sessions can be seen, where $\mathcal{L}\mathcal{L}(S|\mathbf{M})$ is the loglikelihood of the sessions given the models parameters, $S$ the set of sessions, $\mathbf{M}$ the model and its parameters, $r$ is the rank of a particular document in a session and $c_r^{(s)}$ a indicator function that is $1$ when the document at rank $r$ in session $s$ was clicked and $0$ otherwise.
 \begin{align}
-	\mathcal{L}\mathcal{L}(S|\mathbf{M}) = \frac{1}{|S|}\sum_{s \in S} \frac{1}{|s|} \sum_{r = 1}^{|s|} \log P(C_r=c_r^{(s)}|M, C_{r-1}, C_{r-2}\dots C_1)
+	\mathcal{L}\mathcal{L}(S|\mathbf{M}) = \frac{1}{|S|}\sum_{s \in S} \frac{1}{|s|} \sum_{r = 1}^{|s|} \log P(C_r=c_r^{(s)}|\mathbf{M}, C_{r-1}, C_{r-2}\dots C_1)
 	\label{eq:loglikelihood}
 \end{align}
 
