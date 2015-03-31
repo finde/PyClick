@@ -46,7 +46,7 @@ This model builds upon the CTR model. It adds a \texttt{position bias} where doc
 where $j_u$ is the rank of document $u$.
 
 \subsection{Cascade model}
-Cascade model (CM) is another extension to the CTR model. It assumes that users abandon a search session after the first click and hence does not provide a complete picture of how multiple clicks arise in a query session and how to estimate document relevance from such data \cite{Kempe2008, Craswell2008}. This model introduces the \textit{cascade hypothesis}, a used examines a search result page (SERP) from top to bottom, deciding whether to click each result before moving to the next. This means ofcourse that to make a click, the user must have decided both to click and skip the ranks above. The relevance of a document is calculated in the same way as in Equation~\ref{eq:ctr_rel}. The click probability is defined as:
+Cascade model (CM) is another extension to the CTR model. It assumes that users abandon a search session after the first click and hence does not provide a complete picture of how multiple clicks arise in a query session and how to estimate document relevance from such data \cite{Kempe2008,Craswell2008}. This model introduces the \textit{cascade hypothesis}, a used examines a search result page (SERP) from top to bottom, deciding whether to click each result before moving to the next. This means ofcourse that to make a click, the user must have decided both to click and skip the ranks above. The relevance of a document is calculated in the same way as in Equation~\ref{eq:ctr_rel}. The click probability is defined as:
 \begin{align}
 	P(C_{uq}=1) &= P(E_{j_u}=1)P(R_{uq}=1) \label{eq:CM_click} \\
 	P(E_{j_u}=1) &= \prod_{i=1}^{j_u-1} 1 - P(C_{i_u}=1) \nonumber

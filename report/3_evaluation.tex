@@ -19,7 +19,7 @@ Loglikelihood is the default evaluation metric in machine learning. It says some
 Click perplexity is a widely used metric for evaluating click model accuracy. It measures how surprised a model is to see $c_r^{(s)}$ under the current parameters. Perplexity is calculated for every rank individually, as to see whether some models perform better on documents higher on the SERP page then documents ranked lower on the SERP. It is used as a evaluation metric in \cite{Zhang2011} and \cite{Dupret2008}. The calculation of perplexity can be seen in Equation~\ref{eq:perplexity}.
 \begin{align}
 	Perplexity_r &= 2^{-\frac{1}{|S|} \sum_{s \in S}(c_r^{(s)} \log_2 p_r + (1-c_r^{(s)} ) \log_2 (1-p_r))} \label{eq:perplexity} \\
-	p_r &= P(C_r = 1 | \mathbf{M}) \nonumber
+	p_r &= P(C_r = 1 | \mathbf{M}) \label{eq:perp_prob} 
 \end{align}
 The perplexity of a model is defined as the average of perplexities over all positions. Thus, a smaller perplexity value indicates a better consistency between the click model and the actual click data.
 
