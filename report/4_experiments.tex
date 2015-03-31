@@ -76,6 +76,13 @@ In Figure~\ref{fig:perp_rank} the perplexity of different ranks can be seen. As 
 
 \begin{figure}
 	\centering
+	\includegraphics[width=.75\textwidth]{figures/Perp_rank.pdf}
+	\label{fig:perp_rank}
+	\caption{Perplexity of click models at different document rank position}
+\end{figure}
+
+\begin{figure}
+	\centering
 	\begin{subfigure}[b]{.45\textwidth}
 		\centering
 		\includegraphics[width=\textwidth]{figures/Perp_qf.pdf}
@@ -113,6 +120,13 @@ Figures~\ref{fig:ctr_qf} and \ref{fig:ctr_ce} show the impact of query frequency
 
 \subsubsection{Relevance Prediction}
 The results of the relevance prediction task can be seen in Figure~\ref{fig:rel_ce}. The plot for query frequency could not be generated for the lower query frequencies because the protocol for calculation only takes queries into account that occur more than 10 times. Even for the click entropy the results for the different splits are not as interesting as all models perform close almost the same. The models are trained only on the small subset of data and are evaluated on all query-document pairs found in the set of annotated relevances a lot of pairs are never seen before by the model. The model will then predict $0.5$, whereas the annotated relevance is always $0$ or $1$. This means that for all unseen query-document pairs the model will get a RMSE of 0.5 and the effect of document-query pairs that are seen will be negligible. When looking at the models that are trained on all the data we can see that the AUC gets lower then 0.5 this means that the predicted relevances have a negative correlation with the annotated relevances, which is illustrated by the Pearson correlation values we found. The values that were found there were between the 0.05 and -0.05, depending on whether the AUC was above or below 0.5. The p-values that we have found were all below 0.05 and indicate that the test is statiscally significant.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=.75\textwidth]{figures/Rel_Pred_AUC_ce.pdf}
+	\label{fig:rel_ce}
+	\caption{Relevance prediction of click models on click entropy}
+\end{figure}
 
 \subsubsection{Predicted Relevance as a Ranking Feature}
 In Figures~\ref{fig:rank_qf} and~\ref{fig:rank_ce} the results of using the predicted relevance as a ranking feature can be seen.
