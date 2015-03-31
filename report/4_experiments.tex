@@ -69,6 +69,7 @@ An interesting thing to see is that the loglikelihood gets more negative when lo
 		\label{fig:ll_ce}
 	\end{subfigure}
 	\caption{Loglikelihood of click models}
+	\label{fig:ll}
 \end{figure}
 
 
@@ -92,6 +93,7 @@ In Figure~\ref{fig:perp_rank} the perplexity of different ranks can be seen. As 
 		\label{fig:perp_ce}
 	\end{subfigure}
 	\caption{Perplexity of click models}
+	\label{fig:perp}
 \end{figure}
 
 \begin{figure}
@@ -120,6 +122,7 @@ Figures~\ref{fig:ctr_qf} and \ref{fig:ctr_ce} show the impact of query frequency
 		\label{fig:ctr_ce}
 	\end{subfigure}
 	\caption{Click-through rate of click models}
+	\label{fig:ctr}
 \end{figure}
 
 \subsubsection{Relevance Prediction}
@@ -150,6 +153,7 @@ In Figures~\ref{fig:rank_qf} and~\ref{fig:rank_ce} the results of using the pred
 		\label{fig:rank_ce}
 	\end{subfigure}
 	\caption{Ranking prediction of click models}
+	\label{fig:rank}
 \end{figure}
 
 
@@ -182,3 +186,8 @@ The standard error of mean (SEM) is the standard deviation of the sample-mean's 
 
 In all our experiments, the p-value of student-t tests have a complete correlation with SEM.
 Therefore, we only included the SEM as error-bar on the figures. These error bars can also be seen as the confidence level of click models with respect to the evaluation measurement.
+
+In \ref{fig:ll}, every click model has a high confidence level for the likelihood of each bin results. Therefore, we can conclude that all click models are statistically significant from one to the other in term of likelihood.
+
+In \ref{fig:perp_qf} bin 1, all the click models show wider error bar compare with the other bin.
+
