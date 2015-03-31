@@ -185,9 +185,10 @@ The standard error of mean (SEM) is the standard deviation of the sample-mean's 
 \end{align*}
 
 In all our experiments, the p-value of student-t tests have a complete correlation with SEM.
-Therefore, we only included the SEM as error-bar on the figures. These error bars can also be seen as the confidence level of click models with respect to the evaluation measurement.
+Therefore, we only included the SEM as error-bar on the figures. These error bars can also be seen as the confidence level of click models with respect to the evaluation measurement. In Figures~\ref{fig:ll}, every click model has a very high confidence level for the likelihood of each bin results. Therefore, we can conclude that all click models are statistically significant from one to the other in term of likelihood.
 
-In \ref{fig:ll}, every click model has a high confidence level for the likelihood of each bin results. Therefore, we can conclude that all click models are statistically significant from one to the other in term of likelihood.
+In Figure~\ref{fig:perp_qf}, all the click models show wider error bar on bin 1 compared with the other bin. This is an expected behavior because on sessions with single query frequency, all click models were tested with the query document pairs that never seen during training.
 
-In \ref{fig:perp_qf} bin 1, all the click models show wider error bar compare with the other bin.
-
+Click entropy shows lower confidence level compared to query frequency in figures~\ref{fig:rank}.
+This is contradiction with CTR prediction as we can see in figures~\ref{fig:ctr}.
+This kind of behavior might happen because in general, CTR prediction on certain query frequency is harder than CTR prediction on certain click entropy, and vice versa for ranking prediction.
