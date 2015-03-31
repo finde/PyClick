@@ -10,8 +10,6 @@ In this section, we briefly describe their main characteristics and differences.
 		\hline
 		$u$	& Document $u$ \\
 		$q$	& Query $q$ \\
-		$ A $ & Attractiveness variable \\
-		$ \alpha $ & Attractiveness parameter \\
 		$ S $ & Satisfaction variable \\
 		$ \sigma $ & Satisfaction parameter \\
 		$ E $ & Examination variable \\
@@ -59,17 +57,36 @@ In \cite{Dupret2008}, Dupret and Piwowarski propose a new click model called the
 
 A graphical representation of the model is presented in Figure~\ref{fig:ubm_gm}.
 
-\begin{figure}[ht!]
-	\begin{center}
-		\begin{tabular}{c}
-			\begin{tikzpicture}
-			
+\subsection{Click Chain Model}
+In \cite{Guo2009_CCM}, Fan Guo et al, proposed a bayesian based click model which was based on position bias assumption, named Click chain model (CCM). 
+CCM has the following assumptions, some of which are shared with the cascade model.
+\begin{enumerate}
+	\item Users are homogeneous: their information needs are similar given the same query; 
+	\item Decoupled examination and click events: click probability is solely determined by the examination probability and the document relevance at a given position; 
+	\item Cascade hypothesis: examination is in strictly sequential order with no breaks.
+\end{enumerate}
+
+The intuition behind CCM is that the chance that a user continues after a click depends on the relevance of the previous document and that a user might abandon the search after a while. This model can be formalized with the following conditional probabilities:
+\begin{align}
+	P(C_{uq}=1|E_{j_u}=0) &= 0 \nonumber\\
+	P(C_{uq}=1|E_{j_u}=1, R_{uq}) &= R_{uq} \nonumber\\
+	P(E_{j_u+1}=1|E_{j_u}=0) &= 0 \nonumber\\
+	P(E_{j_u+1}=1|E_{j_u}=1,C_{uq}=0) &= \tau_1 \nonumber\\
+	P(E_{j_u+1}=1|E_{j_u}=1,C_{uq}=1,R_{uq}) &= \tau_2(1-R_{uq})+\tau_3 R_{uq} \label{eq:ccm_simplified}
+\end{align}
+
+As $\tau_2$ and $\tau_3$ are only used in Equation~\ref{eq:ccm_simplified} and in conjunction with each other and the relevance of the previous document we have decided to combine them into one parameter, $\tau_{click}$; and $\tau_1$ has been renamed to $\tau_{no\_click}$. A graphical representation of the model is presented in Figure~\ref{fig:ccm_gm}.
+
+\begin{figure}[ht]
+	\begin{subfigure}[b]{.45\textwidth}
+		\centering
+		\begin{tikzpicture}
 			% Define nodes
 			\node[obs, minimum size=1cm]                      				(c) {$C_{uq}$};
-			\node[latent, left=.6cm of c, yshift=.8cm, minimum size=1cm]  	(a) {$A_{uq}$};
+			\node[latent, left=.9cm of c, minimum size=1cm]  	(a) {$R_{uq}$};
 			
-			\node[latent, left=.6cm of c, yshift=-.8cm, minimum size=1cm]  	(e) {$E_{j_u}$};	
-			\node[const, above=.8cm of a]  									(a_u) {$\alpha_u$};
+			\node[latent, left=.9cm of c, yshift=2cm, minimum size=1cm]  	(e) {$E_{j_u}$};	
+			\node[const, left=1cm of a]  									(a_u) {$r_u$};
 			
 			\node[const, left=1cm of e, minimum size=1cm]  	(e_p) {$\gamma_{jj'}$};	
 			
@@ -81,49 +98,24 @@ A graphical representation of the model is presented in Figure~\ref{fig:ubm_gm}.
 			% Plates
 			\plate [inner sep=.5cm, text centered] {u_j} {(a)(e)(c)} {document $u_j$};
 			
-			\end{tikzpicture}
-		\end{tabular}
-	\end{center}
-	\caption{The graphical model of UBM. \fixme{PLACE THIS SIDE BY SIDE WITH CCM}}	
-	\label{fig:ubm_gm}
-\end{figure}
-
-\subsection{Click Chain Model}
-In \cite{Guo2009_CCM}, Fan Guo et al, proposed a bayesian based click model which was based on position bias assumption, named Click chain model (CCM). 
-CCM has the following assumptions, some of which are shared with the cascade model.
-\begin{enumerate}
-	\item Users are homogeneous: their information needs are similar given the same query; 
-	\item Decoupled examination and click events: click probability is solely determined by the examination probability and the document relevance at a given position; 
-	\item Cascade hypothesis: examination is in strictly sequential order with no breaks.
-\end{enumerate}
-
-The intuition behind CCM is that the chance that a user continues after a click depends on the relevance of the previous document and that a user might abandonthe search after a while. This model can be formalized with the following conditional probabilities:
-\begin{align}
-	P(C_{uq}=1|E_{j_u}=0) &= 0 \nonumber\\
-	P(C_{uq}=1|E_{j_u}=1, R_{uq}) &= R_{uq} \nonumber\\
-	P(E_{j_u+1}=1|E_{j_u}=0) &= 0 \nonumber\\
-	P(E_{j_u+1}=1|E_{j_u}=1,C_{uq}=0) &= \tau_1 \nonumber\\
-	P(E_{j_u+1}=1|E_{j_u}=1,C_{uq}=1,R_{uq}) &= \tau_2(1-R_{uq})+\tau_3 R_{uq} \label{eq:ccm_simplified}
-\end{align}
-
-As $\tau_2$ and $\tau_3$ are only used in Equation~\ref{eq:ccm_simplified} and in cojunction with eachother and the relevance of the previous document we have decided to combine them into one parameter, $\tau_{click}$ and $\tau_1$ has been renamed to $\tau_{no\_click}$.
-
-A graphical representation of the model is presented in Figure~\ref{fig:ccm_gm}.
-
-\begin{figure}[ht!]
-	\begin{center}
-		\begin{tabular}{c}
-			\begin{tikzpicture}
+		\end{tikzpicture}
+		\caption{UBM.}	
+		\label{fig:ubm_gm}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{.45\textwidth}
+		\centering
+		\begin{tikzpicture}
 			
 			% Define nodes
 			\node[obs, minimum size=1cm]                      	(c) {$C_{uq}$};
-			\node[latent, above=.6cm of c, minimum size=1cm]  	(a) {$R_{uq}$};			
-			\node[latent, below=.6cm of c, minimum size=1cm]  	(e) {$E_j$};	
+			\node[latent, left=.9cm of c, minimum size=1cm]  	(a) {$R_{uq}$};			
+			\node[latent, left=.9cm of c, yshift=2cm, minimum size=1cm]  	(e) {$E_j$};	
 			
 			\node[obs, minimum size=1cm, right=3cm of c]        (c_1) {$C_{u_{j+1}}$};
-			\node[latent, above=.6cm of c_1, minimum size=1cm]  (a_1) {$R_{u_{j+1}}$};		
-			\node[latent, below=.6cm of c_1, minimum size=1cm] 	(e_1) {$E_{j+1}$};	
-
+			\node[latent, left=.9cm of c_1, minimum size=1cm]  (a_1) {$R_{u_{j+1}}$};		
+			\node[latent, left=.9cm of c_1, yshift=2cm, minimum size=1cm] 	(e_1) {$E_{j+1}$};	
+			
 			%\node[const, above=.8cm of a]  									(a_u) {$\alpha_u$};
 			%\node[const, left=1cm of e, minimum size=1cm]  	(e_p) {$\gamma_{jj'}$};	
 			
@@ -138,11 +130,11 @@ A graphical representation of the model is presented in Figure~\ref{fig:ccm_gm}.
 			\plate [inner sep=.5cm, text centered] {u_j} {(a)(e)(c)} {document $u_j$};
 			\plate [inner sep=.5cm, text centered] {u_j_1} {(a_1)(e_1)(c_1)} {document $u_{j+1}$};
 			
-			\end{tikzpicture}
-		\end{tabular}
-	\end{center}
-	\caption{The graphical model of CCM. \fixme{PLACE THIS SIDE BY SIDE WITH UBM}}	
-	\label{fig:ccm_gm}
+		\end{tikzpicture}
+		\caption{CCM.}
+		\label{fig:ccm_gm}
+	\end{subfigure}	
+	\caption{The graphical model of UBM and CCM.}
 \end{figure}
 
 \subsection{Task-centric Click Model}

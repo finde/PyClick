@@ -1,20 +1,5 @@
 %
 \documentclass{llncs} % For LaTeX2e
-
-\makeatletter
-%% The "\@seccntformat" command is an auxiliary command
-%% (see pp. 26f. of 'The LaTeX Companion,' 2nd. ed.)
-\def\@seccntformat#1{\@ifundefined{#1@cntformat}%
-	{\csname the#1\endcsname\quad}  % default
-	{\csname #1@cntformat\endcsname}% enable individual control
-}
-\let\oldappendix\appendix %% save current definition of \appendix
-\renewcommand\appendix{%
-	\oldappendix
-	\newcommand{\section@cntformat}{\appendixname~\thesection\quad}
-}
-\makeatother
-
 \usepackage{etex}
 \usepackage{hyperref}
 \usepackage{algorithmicx}
@@ -42,6 +27,8 @@
 \makeatletter
 \algrenewcommand\ALG@beginalgorithmic{\ttfamily}
 \makeatother
+
+
 
 \title{
 Click model evaluations
