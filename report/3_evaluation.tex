@@ -57,7 +57,7 @@ In this set of experiments we use the predicted relevance directly to rank urls,
 
 \begin{enumerate}
 	\item Retrieve all session that appear more than 10 times.
-	\item Filter out the sessions that don't appear in the editorial judgements.
+	\item Filter out the sessions that don't appear in the editorial judgments.
 	\item Train the model on the sessions and predict relevance for the sessions.
 	\item Sort the urls w.r.t the predicted relevance given by the model.
 	\item Compute the NDCG@5.
@@ -65,4 +65,4 @@ In this set of experiments we use the predicted relevance directly to rank urls,
 \end{enumerate}
 
 \subsection{Computation Time}
-Historically in machine learning a big problem in creating accurate models was the amount of data that was available. However this is no longer the case, we are mostly restricted by the time that it takes to learn a model from the large amount of data that we currently have. This make the ability to efficiently compute parameters an important feature of a succesful model. Therefore we also decided to look at the computation time it takes to train the click models.
+Historically in machine learning a big problem in creating accurate models was the amount of data that was available. However this is no longer the case, we are mostly restricted by the time that it takes to learn a model from the large amount of data that we currently have. This make the ability to efficiently compute parameters an important feature of a successful model. Therefore we also decided to look at the computation time it takes to train the click models.
