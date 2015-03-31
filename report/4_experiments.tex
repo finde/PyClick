@@ -171,3 +171,15 @@ In Table~\ref{table:results} we see that, as expected, the models that use MLE-i
 	\caption{The results for the experiments on the first million sessions of the dataset. Comp.Time. is Computation time, $\mathcal{LL}$ is the loglikelihood. Perp. is the average perplexity over all ranks. Rel.Pred.AUC is the AUC of the relevance prediction task. Rel.Pred.COR and Rel.Pred.Pval are the Pearson correlation and p-value. Ranking is the NDCG@5 for the ranking performance and CTRPred. is the RMSE of the CTR-prediction task.}
 	\label{table:results}
 \end{table}
+
+\subsubsection{Significance test}
+To determine whether a result is statistically significant, we did a significance test for every session on every evaluation metric criteria. In this report we used two methods: two-tailed student-t test and standard error of the mean. For two-tailed student-t test, we use $\alpha = 0.05$ which commonly used to test the "null hypothesis". 
+
+The standard error of the mean (SEM) is the standard deviation of the sample-mean's estimate of a population mean or can be formalize as following equation:
+\begin{align*}
+	\text{SE}_{\bar{x}} = \frac{stdev}{\sqrt{|\mathcal{S}|}}
+\end{align*}
+
+In all cases of our experiments, the p-value of student-t tests have a complete correlation with SEM.
+Therefore, we only included the SEM as error-bar on each figures, where the two values are statistically significant if there is no intersection between their error-bars.
+These error bars can also be seen as the confidence level of click models with respect to the evaluation measurement.
