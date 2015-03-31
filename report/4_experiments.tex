@@ -176,19 +176,17 @@ In Table~\ref{table:results} we see that, as expected, the models that use MLE-i
 	\label{table:results}
 \end{table}
 
-\subsubsection{Significance test}
-To determine whether our results are statistically significant, we have done a significance test for the results of every evaluation metric. We have used two methods: the two-tailed student-t test and the standard error of mean. For two-tailed student-t test, we use $\alpha = 0.05$ which commonly used to test the "null hypothesis".
+\subsubsection{Significance testing}
+To determine whether our results are statistically significant, we have done a significance testing on the values of every evaluation metric. We have used two methods: the two-tailed student-t test and the standard error of mean. For two-tailed student-t test, we use $\alpha = 0.05$ which commonly used to test the "null hypothesis".
 
-The standard error of mean (SEM) is the standard deviation of the sample-mean's estimate of a population mean or can be formalize as following equation:
+The standard error of mean (SEM) is the standard deviation of the sample-mean's estimate of a population mean as seen in the following equation:
 \begin{align*}
 	\text{SE}_{\bar{x}} = \frac{stdev}{\sqrt{|\mathcal{S}|}}
 \end{align*}
 
-In all our experiments, the p-value of student-t tests have a complete correlation with SEM.
-Therefore, we only included the SEM as error-bar on the figures. These error bars can also be seen as the confidence level of click models with respect to the evaluation measurement. In Figures~\ref{fig:ll}, every click model has a very high confidence level for the likelihood of each bin results. Therefore, we can conclude that all click models are statistically significant from one to the other in term of likelihood.
+In all our experiments, the p-values of student-t tests have a complete correlation with SEM.
+Therefore, we only included the SEM as an error-bar on the figures. These error bars can also be seen as the confidence level of the click models with respect to the evaluation metric. In Figures~\ref{fig:ll}, every click model has a very high confidence level, seen by the small error bars, for the loglikelihood for the test sessions for every part of the dataset. Therefore, we can conclude that all click models are statistically significant from one to the other in terms of loglikelihood.
 
-In Figure~\ref{fig:perp_qf}, all the click models show wider error bar on bin 1 compared with the other bin. This is an expected behavior because on sessions with single query frequency, all click models were tested with the query document pairs that never seen during training.
+In Figures~\ref{fig:perp_qf}, all the click models show a wider error bar on the first bin compared to the other bins. This is expected because of the fact that the dataset only contains queries that are seen once. This means that the models can train on the training sessions to learn the parameters. However the relevance parameter is useless here because the test queries are never seen before. So the models are a lot less sure about their predictions on these queries.
 
-Click entropy shows lower confidence level compared to query frequency in figures~\ref{fig:rank}.
-This is contradiction with CTR prediction as we can see in figures~\ref{fig:ctr}.
-This kind of behavior might happen because in general, CTR prediction on certain query frequency is harder than CTR prediction on certain click entropy, and vice versa for ranking prediction.
+Click entropy shows lower confidence levels compared to query frequency when looking at the ranking performance of the models. This is in contradiction with CTR prediction. This kind of behavior might happen because in general, CTR prediction on a query frequency bin is harder than CTR prediction on a certain click entropy bin, and vice versa for ranking performance.
