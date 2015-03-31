@@ -3,12 +3,12 @@
 In this section we report on the experimental evaluation and comparison of the click models in Section~\ref{sec:methodology} on the evaluation metrics in Section~\ref{sec:evaluation} evaluated on the first 1 million query sessions from the Yandex Relevance Prediction contest of 2011 \cite{YandexData}. The rest of this section will elaborate on the experiments we have done and the results we found. We will also show how query frequency improves the performance of the models. Moreover, we will report on the evaluation measures in combination with click entropy.
 
 \subsection{Experimental Setup}
-The Yandex data set was used in the Yandex Relevance Prediction contest of 2011. In the experiments we have done we have used the first 1 million queries. We deliberatly have chosen to keep sessions that are without any clicks because removing them might hurt the performance of certain models, i.e. TCM because the freshness of a document can change with these sessions. These first 1 million sessions contain 450,931 distinct queries. These queries get divided into a set of training sessions used to train the click models and a set of test sessions used in the evaluation of the models, the number of sessions in these sets have a 3 to 1 ratio. The problem with this approach in combination with the TCM model is that this removes the guarantee that the complete task is used when training or evaluating the model. We expect that this will hurt the performance of the TCM model and that the actual performance might be higher. 
+The Yandex data set was used in the Yandex Relevance Prediction contest of 2011. In the experiments we have done we have used the first 1 million queries. We deliberately have chosen to keep sessions that are without any clicks because removing them might hurt the performance of certain models, i.e. TCM because the freshness of a document can change with these sessions. These first 1 million sessions contain 450,931 distinct queries. These queries get divided into a set of training sessions used to train the click models and a set of test sessions used in the evaluation of the models, the number of sessions in these sets have a 3 to 1 ratio. The problem with this approach in combination with the TCM model is that this removes the guarantee that the complete task is used when training or evaluating the model. We expect that this will hurt the performance of the TCM model and that the actual performance might be higher. 
 
 \subsubsection{Performance impacting factors}
 To report on the performance with regard to query frequency we have split the data into 4 parts. The distribution of these parts can be seen in Table~\ref{table:query_split}.We see that there are a lot of queries that are only seen once, these queries are not informative for the models that only look at relevance, e.g. the CTR and CM models, however they are informative for the other models to infer other parameters than relevance. We also see that there are few queries In the rest of this section with every evaluation measure we will also report on how this was influenced by the query frequency. We did this by only using the sessions for a particular group of query frequencies. This way all parameters can be optimal for these frequencies. This does raise a problem however for the query frequency bin of 6 to 19, here there are so few queries it is hard for the models to learn the correct parameters. This will have a negative effect on the performance of the models. 
 
-The second factor that might influence performance that we have analyzed is the click entropy. The click entropy was also used to analyse queries in \cite{dou2008}.The formal definition is shown in Equation~\ref{eq:entropy}.
+The second factor that might influence performance that we have analyzed is the click entropy. The click entropy was also used to analyzse queries in \cite{dou2008}.The formal definition is shown in Equation~\ref{eq:entropy}.
 
 \begin{align}
 	ClickEntropy(q) &= \sum_{d \in \mathcal{P}(q)} - P(d|q) \log_2 P(d|q) \label{eq:entropy} \\
@@ -19,7 +19,7 @@ Here $ClickEntropy(q)$ is the click entropy for query $q$. $\mathcal{P}(q)$ are 
 The search sessions have been divided into 3 parts with respect to click entropy and the evaluation measures have been tested on these parts in the same way as query frequency. Statistics of these parts can be seen in Table~\ref{table:entropy_split}.
 \\
 
-\begin{minipage}[b]{.4\textwidth}
+\begin{minipage}[b]{.45\textwidth}
 	\centering
 \begin{tabular}{lc}
 \hline
@@ -33,7 +33,8 @@ Query frequency & Number of sessions \\ \midrule
 \label{table:query_split}
 \end{minipage}
 \qquad
-\begin{minipage}[b]{.4\textwidth}
+\begin{minipage}[b]{.45\textwidth}
+	\centering
 \begin{tabular}{lc}
 \toprule
 Click entropy & Number of sessions \\ \midrule
@@ -72,7 +73,7 @@ An interesting thing to see is that the loglikelihood gets more negative when lo
 
 
 \subsubsection{Perplexity}
-In Figures~\ref{fig:perp_qf} and \ref{fig:perp_ce} the influence of the query frequency and click entropy on the perplexity can be seen. The fact that TCM and PBM perform better than UBM is surprising considering the results of the loglikelihood-experiments. When we compare the figures of loglikelihood (\ref{fig:ll_qf},~\ref{fig:ll_ce}) and perplexity(\ref{fig:perp_qf},~\ref{fig:perp_ce}) with eachother we can see that UBM performs best on loglikelihood while not being the best on perplexity. This is due to the fact that the loglikelihood is the conditional probability of a click, seen in Equation~\ref{eq:loglikelihood} while perplexity uses the unconditional probabilities, seen in Equation~\ref{eq:perp_prob}. UBM uses the distance between the current document and the last click to determine the examination probability which is ofcourse easier to compute if the last click is observed instead of marginalizing over all possible distances since the last click.
+In Figures~\ref{fig:perp_qf} and \ref{fig:perp_ce} the influence of the query frequency and click entropy on the perplexity can be seen. The fact that TCM and PBM perform better than UBM is surprising considering the results of the loglikelihood-experiments. When we compare the figures of loglikelihood (\ref{fig:ll_qf},~\ref{fig:ll_ce}) and perplexity(\ref{fig:perp_qf},~\ref{fig:perp_ce}) with eachother we can see that UBM performs best on loglikelihood while not being the best on perplexity. This is due to the fact that the loglikelihood is the conditional probability of a click, seen in Equation~\ref{eq:loglikelihood} while perplexity uses the unconditional probabilities, seen in Equation~\ref{eq:perp_prob}. UBM uses the distance between the current document and the last click to determine the examination probability which is of course easier to compute if the last click is observed instead of marginalizing over all possible distances since the last click.
 
 In Figure~\ref{fig:perp_rank} the perplexity of different ranks can be seen. As a document has a higher rank the models perplexity gets lower. However speed with which it gets lower differs per model. TCM and PBM have a high perplexity for the lower ranks, the documents that are more often examined by the users. Whereas for high ranks they are the top performers in terms of perplexity. What this shows is that position based click models, of which our implementation of TCM is one, the examination parameter is more accurate than the examination parameter inferred by other models.
 
@@ -102,7 +103,7 @@ In Figure~\ref{fig:perp_rank} the perplexity of different ranks can be seen. As 
 
 
 \subsubsection{CTR-Prediction}
-Figures~\ref{fig:ctr_qf} and \ref{fig:ctr_ce} show the impact of query frequency and click entropy on the CTR-prediction task. In this task the simple models, CTR and CM, outperform the more complex ones. This is because the intuition of these models is exactly what this task has set out to measure. As seen in the explanation of this task in Section~\ref{sec:ctr} this task is designed to take away the position bias by only testing on the sessions where the document appears in the first place. However it is dissappointing that the complex models perform so much worse. This may have to do with the fact that every time the models are trained on a very small sample of the entire dataset. A consequence of this is that the other parameters, that are used by the complex models besides the relevance parameter, have little data to train on which influences the relevance parameter. Because of this we propose to change the method for calculating the CTR-prediction. By not training on one query at a time but on all queries in the same time the other parameters will train better and thus models that use EM-inference have a better chance to learn the actual relevance of a document.
+Figures~\ref{fig:ctr_qf} and \ref{fig:ctr_ce} show the impact of query frequency and click entropy on the CTR-prediction task. In this task the simple models, CTR and CM, outperform the more complex ones. This is because the intuition of these models is exactly what this task has set out to measure. As seen in the explanation of this task in Section~\ref{sec:ctr} this task is designed to take away the position bias by only testing on the sessions where the document appears in the first place. However it is disappointing that the complex models perform so much worse. This may have to do with the fact that every time the models are trained on a very small sample of the entire dataset. A consequence of this is that the other parameters, that are used by the complex models besides the relevance parameter, have little data to train on which influences the relevance parameter. Because of this we propose to change the method for calculating the CTR-prediction. By not training on one query at a time but on all queries in the same time the other parameters will train better and thus models that use EM-inference have a better chance to learn the actual relevance of a document.
 
 \begin{figure}
 	\centering
