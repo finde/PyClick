@@ -1,5 +1,6 @@
 \section{Experiments}
-In this section we report on the experimental evaluation and comparison of the click models in Section~\ref{sec:methodology} on the evaluation metrics in Section~\ref{sec:evaluation} evaluated on the first 1 million query sessions from the Yandex Relevance Prediction contest of 2011 \ref{YandexData}. The rest of this section will elaborate on the experiments we have done and the results we found. We will also show how query frequency improves the performance of the models. Moreover, we will report on the evaluation measures in combination with click entropy.
+\label{sec:experiments}
+In this section we report on the experimental evaluation and comparison of the click models in Section~\ref{sec:methodology} on the evaluation metrics in Section~\ref{sec:evaluation} evaluated on the first 1 million query sessions from the Yandex Relevance Prediction contest of 2011 \cite{YandexData}. The rest of this section will elaborate on the experiments we have done and the results we found. We will also show how query frequency improves the performance of the models. Moreover, we will report on the evaluation measures in combination with click entropy.
 
 \subsection{Experimental Setup}
 The Yandex data set was used in the Yandex Relevance Prediction contest of 2011. In the experiments we have done we have used the first 1 million queries. We deliberatly have chosen to keep sessions that are without any clicks because removing them might hurt the performance of certain models, i.e. TCM because the freshness of a document can change with these sessions. These first 1 million sessions contain 450,931 distinct queries. These queries get divided into a set of training sessions used to train the click models and a set of test sessions used in the evaluation of the models, the number of sessions in these sets have a 3 to 1 ratio. The problem with this approach in combination with the TCM model is that this removes the guarantee that the complete task is used when training or evaluating the model. We expect that this will hurt the performance of the TCM model and that the actual performance might be higher. 
@@ -41,6 +42,7 @@ Click entropy & Number of sessions \\ \midrule
 2+            & 336266             \\ \bottomrule \\
 \end{tabular}
 \captionof{table}{The distribution of session with respect to click entropy}
+\label{table:entropy_split}
 \end{minipage}
 
 \subsection{Results}
@@ -53,13 +55,13 @@ An interesting thing to see is that the loglikelihood gets more negative when lo
 
 \begin{figure}
 	\centering
-	\begin{subfigure}[b]{.45\textwidth}
+	\begin{subfigure}[b]{.49\textwidth}
 	\centering
 		\includegraphics[width=\textwidth]{figures/LL_qf.pdf}
 		\caption{Query frequency}
 		\label{fig:ll_qf}
 	\end{subfigure}
-	\begin{subfigure}[b]{.45\textwidth}
+	\begin{subfigure}[b]{.49\textwidth}
 		\centering
 		\includegraphics[width=\textwidth]{figures/LL_ce.pdf}
 		\caption{Click entropy}
@@ -76,20 +78,20 @@ In Figure~\ref{fig:perp_rank} the perplexity of different ranks can be seen. As 
 
 \begin{figure}
 	\centering
-	\includegraphics[width=.75\textwidth]{figures/Perp_rank.pdf}
+	\includegraphics[width=.8\textwidth]{figures/Perp_rank.pdf}
 	\label{fig:perp_rank}
 	\caption{Perplexity of click models at different document rank position}
 \end{figure}
 
 \begin{figure}
 	\centering
-	\begin{subfigure}[b]{.45\textwidth}
+	\begin{subfigure}[b]{.49\textwidth}
 		\centering
 		\includegraphics[width=\textwidth]{figures/Perp_qf.pdf}
 		\caption{Query frequency}
 		\label{fig:perp_qf}
 	\end{subfigure}
-	\begin{subfigure}[b]{.45\textwidth}
+	\begin{subfigure}[b]{.49\textwidth}
 		\centering
 		\includegraphics[width=\textwidth]{figures/Perp_ce.pdf}
 		\caption{Click entropy}
@@ -103,13 +105,13 @@ Figures~\ref{fig:ctr_qf} and \ref{fig:ctr_ce} show the impact of query frequency
 
 \begin{figure}
 	\centering
-	\begin{subfigure}[b]{.45\textwidth}
+	\begin{subfigure}[b]{.49\textwidth}
 		\centering
 		\includegraphics[width=\textwidth]{figures/CTRPred_qf.pdf}
 		\caption{Query frequency}
 		\label{fig:ctr_qf}
 	\end{subfigure}
-	\begin{subfigure}[b]{.45\textwidth}
+	\begin{subfigure}[b]{.49\textwidth}
 		\centering
 		\includegraphics[width=\textwidth]{figures/CTRPred_ce.pdf}
 		\caption{Click entropy}
@@ -123,7 +125,7 @@ The results of the relevance prediction task can be seen in Figure~\ref{fig:rel_
 
 \begin{figure}
 	\centering
-	\includegraphics[width=.75\textwidth]{figures/Rel_Pred_AUC_ce.pdf}
+	\includegraphics[width=.49\textwidth]{figures/Rel_Pred_AUC_ce.pdf}
 	\label{fig:rel_ce}
 	\caption{Relevance prediction of click models on click entropy}
 \end{figure}
@@ -133,13 +135,13 @@ In Figures~\ref{fig:rank_qf} and~\ref{fig:rank_ce} the results of using the pred
 
 \begin{figure}
 	\centering
-	\begin{subfigure}[b]{.45\textwidth}
+	\begin{subfigure}[b]{.49\textwidth}
 		\centering
 		\includegraphics[width=\textwidth]{figures/Ranking_NDCG_qf.pdf}
 		\caption{Query frequency}
 		\label{fig:rank_qf}
 	\end{subfigure}
-	\begin{subfigure}[b]{.45\textwidth}
+	\begin{subfigure}[b]{.49\textwidth}
 		\centering
 		\includegraphics[width=\textwidth]{figures/Ranking_NDCG_ce.pdf}
 		\caption{Click entropy}
