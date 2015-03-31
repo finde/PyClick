@@ -1,0 +1,104 @@
+\section{CCM conditional probability}
+
+\subsection{Conversion from $\alpha$ to $\tau_{click}$}
+\begin{align*}
+\tau_{click} R_i 
+&= \alpha_2(1-R_i)+\alpha_3 R_i \\
+&= \frac{\alpha_2}{\alpha_2-\alpha_3}R_i \\
+\tau_{click}
+&= \frac{\alpha_2}{\alpha_2-\alpha_3}
+\end{align*}
+
+\subsection {Conditional probability for rank = 1}
+\begin{align*}
+P(C_1=1) 
+&= P(C_1=1|E_1=1) P(E_1=1) + P(C_1=1|E_1=0) P(E_1=0) \\
+&= P(C_1=1|E_1=1) 1 + 0 * 0 \\
+&= P(C_1=1|E_1=1,R_1) P(R_1) \\
+&= R_1 \\\\
+P(E_1=1)&=1
+\end{align*}
+
+\subsection {Conditional probability for rank = 2}
+\begin{align*}
+P(C_2=1|C_1) 
+&= c_1 P(C_2 = 1|C_1=1) + (1-c_1) P(C_2=1|C_1=0)
+\end{align*}
+
+if $rank_1$ is clicked:
+\begin{align*}
+P(C_2 = 1|C_1=1) 
+&= P(C_2=1|C_1=1,E_2=1) P(E_2=1|C_1=1) + P(C_2=1|C_1=1,E_2=0) P(E_2=0|C_1=1) \\
+&= R_2 P(E_2=1|C_1=1) + 0 \\
+&= R_2 (P(E_2=1|C_1=1,E_1=1) P(E_1=1|C_1=1) + P(E_2=1|C_1=1,E_1=0) P(E_1=0|C_1=1)) \\
+&= R_2 (P(E_2=1|C_1=1,E_1=1) + 0) \\
+&= R_2 R_1 \tau_{click}
+\end{align*}
+
+if $rank_1$ is not clicked:
+\begin{align*}
+P(C_2 = 1|C_1=0) 
+&= P(C_2=1|C_1=0,E_2=1) P(E_2=1|C_1=0) + P(C_2=1|C_1=0,E_2=0) P(E_2=0|C_1=0) \\
+&= R_2 P(E_2=1|C_1=0) + 0 \\
+&= R_2 (P(E_2=1|C_1=0,E_1=1) P(E_1=1|C_1=0) + P(E_2=1|C_1=0,E_1=0) P(E_1=0|C_1=0)) \\
+&= R_2 (P(E_2=1|C_1=0,E_1=1) + 0) \\
+&= R_2 \tau_{not\_click} (1-R_1)
+\end{align*}
+
+\subsection {Conditional probability for rank = k}
+\begin{align*}
+P(C_k = 1 |C_{k-1} \dots C_1)
+&= P(C_k = 1 | C_{k-1}=1 \dots C_1) * P(C_{k-1} = 1| C_{k-2} \dots C_1) \\
+&+ P(C_k = 1 | C_{k-1}=0 \dots C_1) * P(C_{k-1} = 0| C_{k-2} \dots C_1) \\
+\end{align*}
+
+if previous clicked:
+\begin{align*}
+P(C_k = 1 | C_{k-1}=1 \dots C_1)
+&= P(C_k = 1 | C_{k-1}=1 \dots C_1, E_k = 1) * P(E_k = 1 | C_{k-1}=1 \dots C_1) \\
+&+ P(C_k = 1 | C_{k-1}=1 \dots C_1, E_k = 0) * P(E_k = 0 | C_{k-1}=1 \dots C_1) \\
+&= R_k * P(E_k = 1 | C_{k-1}=1 \dots C_1) + 0 \\
+P(E_k = 1 | C_{k-1}=1 \dots C_1) 
+&= P(E_k = 1 | C_{k-1}=1 \dots C_1, E_{k-1} = 1) * P(E_{k-1}=1 | C_{k-1}=1 \dots C_1) \\
+&+ P(E_k = 1 | C_{k-1}=1 \dots C_1, E_{k-1} = 0) * P(E_{k-1}=0) \\
+&= \tau_{click}R_{k-1} * 1 + 0 \\
+P(C_k = 1 | C_{k-1}=1 \dots C_1) 
+&= R_k * \tau_{click}R_{k-1}
+\end{align*}
+
+% ^this is the same as R=2, clicked
+
+if previous doc not clicked
+\begin{align*}
+P(C_k = 1 | C_{k-1}=0 \dots C_1)
+&= P(C_k = 1 | C_{k-1}=0 \dots C_1, E_k = 1) * P(E_k = 1 | C_{k-1}=0 \dots C_1) \\
+&+ P(C_k = 1 | C_{k-1}=0 \dots C_1, E_k = 0) * P(E_k = 0 | C_{k-1}=0 \dots C_1) \\
+&= P(C_k = 1 | C_{k-1}=0 \dots C_1, E_k = 1) * P(E_k = 1 | C_{k-1}=0 \dots C_1) + 0 \\
+&= R_k * P(E_k = 1 | C_{k-1}=0 \dots C_1) \\
+P(E_k = 1 | C_{k-1}=0 \dots C_1) 
+&= P(E_k = 1 | C_{k-1}=0 \dots C_1, E_{k-1} = 1) * P(E_{k-1}=1 | C_{k-1}=0 \dots C_1) \\
+&+ P(E_k = 1 | C_{k-1}=0 \dots C_1, E_{k-1} = 0) * P(E_{k-1}=0 | | C_{k-1}=0 \dots C_1) \\
+&= \tau_{no\_click}(1-R_{k-1}) * P(E_{k-1}=1 | C_{k-1}=0 \dots C_1) + 0 \\
+&= \prod^{k-1}_{i = j}\tau_{no\_click} (1-R_j)
+\end{align*}
+
+\\
+\\
+So in general
+\begin{align*}
+P(E_k = 1 | C_{k-1}, \dots C_1) &= P(E_k = 1 | C_{k-1} = 1, \dots C_1) * c_{k-1} + P(E_k = 1 | C_{k-1} = 0, \dots C_1) * (1 - c_{k-1}) \\
+\\
+P(E_k = 1 | C_{k-1} = 1 \dots C_1) &= R_{k-1}\tau_{click} \\
+P(E_k = 1 | C_{k-1} = 0, \dots C_1) &= \prod^{k-1}_{i = j}\tau_{no\_click} (1-R_j)
+\end{align*} 
+
+Continuing from above:
+
+\begin{align*}
+P(C_k = 1 |C_{k-1} \dots C_1)
+&= P(C_k = 1 | C_{k-1}=1 \dots C_1) * c_{k-1} \\
+&+ P(C_k = 1 | C_{k-1}=0 \dots C_1) * (1-c_{k-1}) \\
+&= R_k c_{k-1}\tau_{click}R_{k-1} \\
+&+ R_k (1-c_{k-1}) \prod^{k-1}_{i = j}\tau_{no\_click} (1-R_j) \\
+P(C_1 = 1) &= R_1 \\
+\end{align*}
