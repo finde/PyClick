@@ -173,13 +173,12 @@ In Table~\ref{table:results} we see that, as expected, the models that use MLE-i
 \end{table}
 
 \subsubsection{Significance test}
-To determine whether a result is statistically significant, we did a significance test for every session on every evaluation metric criteria. In this report we used two methods: two-tailed student-t test and standard error of the mean. For two-tailed student-t test, we use $\alpha = 0.05$ which commonly used to test the "null hypothesis". 
+To determine whether our results are statistically significant, we have done a significance test for the results of every evaluation metric. We have used two methods: the two-tailed student-t test and the standard error of mean. For two-tailed student-t test, we use $\alpha = 0.05$ which commonly used to test the "null hypothesis".
 
-The standard error of the mean (SEM) is the standard deviation of the sample-mean's estimate of a population mean or can be formalize as following equation:
+The standard error of mean (SEM) is the standard deviation of the sample-mean's estimate of a population mean or can be formalize as following equation:
 \begin{align*}
 	\text{SE}_{\bar{x}} = \frac{stdev}{\sqrt{|\mathcal{S}|}}
 \end{align*}
 
-In all cases of our experiments, the p-value of student-t tests have a complete correlation with SEM.
-Therefore, we only included the SEM as error-bar on each figures, where the two values are statistically significant if there is no intersection between their error-bars.
-These error bars can also be seen as the confidence level of click models with respect to the evaluation measurement.
+In all our experiments, the p-value of student-t tests have a complete correlation with SEM.
+Therefore, we only included the SEM as error-bar on the figures. These error bars can also be seen as the confidence level of click models with respect to the evaluation measurement.
