@@ -51,19 +51,89 @@ In Figures \ref{fig:ll_qf} and \ref{fig:ll_ce} the results of the loglikelihood 
 
 An interesting thing to see is that the loglikelihood gets more negative when looking at the queries with 20+ sessions. We think this is because queries that happen more frequently will also have more documents that are shown to the user overall. This means that a particular document is shown less to the model which makes it harder to predict the click probability.
 
+\begin{figure}
+	\centering
+	\begin{subfigure}[b]{.45\textwidth}
+	\centering
+		\includegraphics[width=\textwidth]{figures/LL_qf.pdf}
+		\caption{Query frequency}
+		\label{fig:ll_qf}
+	\end{subfigure}
+	\begin{subfigure}[b]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{figures/LL_ce.pdf}
+		\caption{Click entropy}
+		\label{fig:ll_ce}
+	\end{subfigure}
+	\caption{Loglikelihood of click models}
+\end{figure}
+
+
 \subsubsection{Perplexity}
 In Figures~\ref{fig:perp_qf} and \ref{fig:perp_ce} the influence of the query frequency and click entropy on the perplexity can be seen. The fact that TCM and PBM perform better than UBM is surprising considering the results of the loglikelihood-experiments. When we compare the figures of loglikelihood (\ref{fig:ll_qf},~\ref{fig:ll_ce}) and perplexity(\ref{fig:perp_qf},~\ref{fig:perp_ce}) with eachother we can see that UBM performs best on loglikelihood while not being the best on perplexity. This is due to the fact that the loglikelihood is the conditional probability of a click, seen in Equation~\ref{eq:loglikelihood} while perplexity uses the unconditional probabilities, seen in Equation~\ref{eq:perp_prob}. UBM uses the distance between the current document and the last click to determine the examination probability which is ofcourse easier to compute if the last click is observed instead of marginalizing over all possible distances since the last click.
 
 In Figure~\ref{fig:perp_rank} the perplexity of different ranks can be seen. As a document has a higher rank the models perplexity gets lower. However speed with which it gets lower differs per model. TCM and PBM have a high perplexity for the lower ranks, the documents that are more often examined by the users. Whereas for high ranks they are the top performers in terms of perplexity. What this shows is that position based click models, of which our implementation of TCM is one, the examination parameter is more accurate than the examination parameter inferred by other models.
 
+\begin{figure}
+	\centering
+	\begin{subfigure}[b]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{figures/Perp_qf.pdf}
+		\caption{Query frequency}
+		\label{fig:perp_qf}
+	\end{subfigure}
+	\begin{subfigure}[b]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{figures/Perp_ce.pdf}
+		\caption{Click entropy}
+		\label{fig:perp_ce}
+	\end{subfigure}
+	\caption{Perplexity of click models}
+\end{figure}
+
 \subsubsection{CTR-Prediction}
 Figures~\ref{fig:ctr_qf} and \ref{fig:ctr_ce} show the impact of query frequency and click entropy on the CTR-prediction task. In this task the simple models, CTR and CM, outperform the more complex ones. This is because the intuition of these models is exactly what this task has set out to measure. As seen in the explanation of this task in Section~\ref{sec:ctr} this task is designed to take away the position bias by only testing on the sessions where the document appears in the first place. However it is dissappointing that the complex models perform so much worse. This may have to do with the fact that every time the models are trained on a very small sample of the entire dataset. A consequence of this is that the other parameters, that are used by the complex models besides the relevance parameter, have little data to train on which influences the relevance parameter. Because of this we propose to change the method for calculating the CTR-prediction. By not training on one query at a time but on all queries in the same time the other parameters will train better and thus models that use EM-inference have a better chance to learn the actual relevance of a document.
+
+\begin{figure}
+	\centering
+	\begin{subfigure}[b]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{figures/CTRPred_qf.pdf}
+		\caption{Query frequency}
+		\label{fig:ctr_qf}
+	\end{subfigure}
+	\begin{subfigure}[b]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{figures/CTRPred_ce.pdf}
+		\caption{Click entropy}
+		\label{fig:ctr_ce}
+	\end{subfigure}
+	\caption{Click-through rate of click models}
+\end{figure}
 
 \subsubsection{Relevance Prediction}
 The results of the relevance prediction task can be seen in Figure~\ref{fig:rel_ce}. The plot for query frequency could not be generated for the lower query frequencies because the protocol for calculation only takes queries into account that occur more than 10 times. Even for the click entropy the results for the different splits are not as interesting as all models perform close almost the same. The models are trained only on the small subset of data and are evaluated on all query-document pairs found in the set of annotated relevances a lot of pairs are never seen before by the model. The model will then predict $0.5$, whereas the annotated relevance is always $0$ or $1$. This means that for all unseen query-document pairs the model will get a RMSE of 0.5 and the effect of document-query pairs that are seen will be negligible. When looking at the models that are trained on all the data we can see that the AUC gets lower then 0.5 this means that the predicted relevances have a negative correlation with the annotated relevances, which is illustrated by the Pearson correlation values we found. The values that were found there were between the 0.05 and -0.05, depending on whether the AUC was above or below 0.5. The p-values that we have found were all below 0.05 and indicate that the test is statiscally significant.
 
 \subsubsection{Predicted Relevance as a Ranking Feature}
 In Figures~\ref{fig:rank_qf} and~\ref{fig:rank_ce} the results of using the predicted relevance as a ranking feature can be seen.
+
+\begin{figure}
+	\centering
+	\begin{subfigure}[b]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{figures/Ranking_NDCG_qf.pdf}
+		\caption{Query frequency}
+		\label{fig:rank_qf}
+	\end{subfigure}
+	\begin{subfigure}[b]{.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{figures/Ranking_NDCG_ce.pdf}
+		\caption{Click entropy}
+		\label{fig:rank_ce}
+	\end{subfigure}
+	\caption{Ranking prediction of click models}
+\end{figure}
+
 
 \subsubsection{Computation time}
 In Table~\ref{table:results} we see that, as expected, the models that use MLE-inference are much faster than the models with EM-inference. These training times depend on the number of queries that the model is trained upon and the amount of parameters a model has. An interesting thing to note is that the UBM model out performs TCM and CCM by a large margin.
