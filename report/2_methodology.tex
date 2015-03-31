@@ -103,7 +103,7 @@ The intuition behind CCM is that the chance that a user continues after a click 
 	P(C_{uq}=1|E_{j_u}=1, R_{uq}) &= R_{uq} \nonumber\\
 	P(E_{j_u+1}=1|E_{j_u}=0) &= 0 \nonumber\\
 	P(E_{j_u+1}=1|E_{j_u}=1,C_{uq}=0) &= \tau_1 \nonumber\\
-	P(E_{j_u+1}=1|E_{j_u}=1,C_{uq}=1,R_{uq}) &= \tau_2(1-R_{uq})+\tau_3 R_{uq} \label{eq:ccm_simplified}\\
+	P(E_{j_u+1}=1|E_{j_u}=1,C_{uq}=1,R_{uq}) &= \tau_2(1-R_{uq})+\tau_3 R_{uq} \label{eq:ccm_simplified}
 \end{align}
 
 As $\tau_2$ and $\tau_3$ are only used in Equation~\ref{eq:ccm_simplified} and in cojunction with eachother and the relevance of the previous document we have decided to combine them into one parameter, $\tau_{click}$ and $\tau_1$ has been renamed to $\tau_{no\_click}$.
