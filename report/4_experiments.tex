@@ -78,13 +78,6 @@ In Figure~\ref{fig:perp_rank} the perplexity of different ranks can be seen. As 
 
 \begin{figure}
 	\centering
-	\includegraphics[width=.8\textwidth]{figures/Perp_rank.pdf}
-	\label{fig:perp_rank}
-	\caption{Perplexity of click models at different document rank position}
-\end{figure}
-
-\begin{figure}
-	\centering
 	\begin{subfigure}[b]{.49\textwidth}
 		\centering
 		\includegraphics[width=\textwidth]{figures/Perp_qf.pdf}
@@ -99,6 +92,14 @@ In Figure~\ref{fig:perp_rank} the perplexity of different ranks can be seen. As 
 	\end{subfigure}
 	\caption{Perplexity of click models}
 \end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=.8\textwidth]{figures/Perp_rank.pdf}
+	\caption{Perplexity of click models at different document rank position}
+	\label{fig:perp_rank}
+\end{figure}
+
 
 \subsubsection{CTR-Prediction}
 Figures~\ref{fig:ctr_qf} and \ref{fig:ctr_ce} show the impact of query frequency and click entropy on the CTR-prediction task. In this task the simple models, CTR and CM, outperform the more complex ones. This is because the intuition of these models is exactly what this task has set out to measure. As seen in the explanation of this task in Section~\ref{sec:ctr} this task is designed to take away the position bias by only testing on the sessions where the document appears in the first place. However it is dissappointing that the complex models perform so much worse. This may have to do with the fact that every time the models are trained on a very small sample of the entire dataset. A consequence of this is that the other parameters, that are used by the complex models besides the relevance parameter, have little data to train on which influences the relevance parameter. Because of this we propose to change the method for calculating the CTR-prediction. By not training on one query at a time but on all queries in the same time the other parameters will train better and thus models that use EM-inference have a better chance to learn the actual relevance of a document.
@@ -126,12 +127,12 @@ The results of the relevance prediction task can be seen in Figure~\ref{fig:rel_
 \begin{figure}
 	\centering
 	\includegraphics[width=.49\textwidth]{figures/Rel_Pred_AUC_ce.pdf}
-	\label{fig:rel_ce}
 	\caption{Relevance prediction of click models on click entropy}
+	\label{fig:rel_ce}
 \end{figure}
 
 \subsubsection{Predicted Relevance as a Ranking Feature}
-In Figures~\ref{fig:rank_qf} and~\ref{fig:rank_ce} the results of using the predicted relevance as a ranking feature can be seen.
+In Figures~\ref{fig:rank_qf} and~\ref{fig:rank_ce} the results of using the predicted relevance as a ranking feature can be seen. These results are not as good as expected, especially for the 6-19 query frequency bin. For the 6-19 query frequency bin the explanation for this performance is the fact that there are few queries for this bin. 
 
 \begin{figure}
 	\centering
