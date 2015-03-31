@@ -15,7 +15,6 @@ Loglikelihood is the default evaluation metric in machine learning. It says some
 	\label{eq:loglikelihood}
 \end{align}
 
-
 \subsection{Perplexity}
 Click perplexity is a widely used metric for evaluating click model accuracy. It measures how surprised a model is to see $c_r^{(s)}$ under the current parameters. Perplexity is calculated for every rank individually, as to see whether some models perform better on documents higher on the SERP page then documents ranked lower on the SERP. It is used as a evaluation metric in \cite{Zhang2011} and \cite{Dupret2008}. The calculation of perplexity can be seen in Equation~\ref{eq:perplexity}.
 \begin{align}
@@ -49,9 +48,9 @@ The error measure we use is the Root-Mean-Square-Error (RMSE).
 \subsection{Relevance Prediction}
 Relevance prediction was used to evaluate performance of the DBN model \cite[p. 6]{Chapelle2009}.
 The accuracy of CTR prediction may not directly translate to relevance, especially when we were to evaluate the whole task instead of a single query.
-In this case, the CTR of a particular document is highly dependent on the user-model assumption.
+In this case, the CTR of a particular document is highly dependent on the user-model assumptions.
 For example if a user tends to ignore a document that isn't fresh, the CTR will be low even if the document is relevant.
-To measure relevance prediction we use a hand annotated set of relevances. We then use the Area Under the Curve (AUC) between the annotated relevances and the predicted relevances as an evaluation measure. We also measure the Pearson correlation between the two. 
+To measure relevance prediction we use a hand annotated set of relevances. This set contains for a group of query-document pairs a relevance. For these pairs we use the models to predict the relevance. We then use the Area Under the Curve (AUC) between the annotated relevances and the predicted relevances as an evaluation measure. We also calculate the pearson-correlation between the two.
 
 \subsection{Predicted Relevance as a Ranking Feature}
 In this set of experiments we use the predicted relevance directly to rank urls, we use the model as a ranker. To evaluate the performance of a ranker we use the Normalized Discounted Cumulative Gain (NDCG) \cite{NDCG}, for which we use a cutoff at five (NDCG@5). To calculate the NDCG@5 we only consider the documents for which we have annotated relevances. All these queries are then averaged to calculate the ranking performance of the click model. The algorithm can be seen below:
@@ -66,6 +65,4 @@ In this set of experiments we use the predicted relevance directly to rank urls,
 \end{enumerate}
 
 \subsection{Computation Time}
-Historically in machine learning a big problem in creating accurate models was the amount of data that was available. However this is no longer the case, we are mostly restricted by the time that it takes to learn a model from the large amount of data that we currently have. So an important feature of a succesful click model is that it should be able to efficiently compute its parameters. Therefore, we also decided to look at the computation time it takes to train the click models.
-
-\fixme{TODO: Add some info about machine it is run on???}
+Historically in machine learning a big problem in creating accurate models was the amount of data that was available. However this is no longer the case, we are mostly restricted by the time that it takes to learn a model from the large amount of data that we currently have. This make the ability to efficiently compute parameters an important feature of a succesful model. Therefore we also decided to look at the computation time it takes to train the click models.
